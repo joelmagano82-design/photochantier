@@ -479,6 +479,7 @@ input:focus,select:focus{outline:2px solid var(--signal);outline-offset:0;border
     <div class="btn-row">
       <button id="viewerShare" class="btn primary"><svg class="ic" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>Partager</button>
       <a id="viewerDrive" class="btn" target="_blank" rel="noopener">Ouvrir dans Drive</a>
+      <button id="viewerDelete" class="btn danger" aria-label="Supprimer la photo"><svg class="ic" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/></svg>Supprimer</button>
     </div>
   </div>
   <button id="viewerClose" class="icon-btn glass" aria-label="Fermer"><svg class="ic" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
@@ -536,7 +537,7 @@ input:focus,select:focus{outline:2px solid var(--signal);outline-offset:0;border
       <button id="galMore" class="btn block" hidden>Charger plus de photos</button>
     </div>
   </div>
-  <div id="galBar" class="gal-bar" hidden><b id="galCount">0 sélectionnée</b><button id="galCancel" class="btn">Annuler</button><button id="galShare" class="btn primary" disabled>Partager</button></div>
+  <div id="galBar" class="gal-bar" hidden><b id="galCount">0 sélectionnée</b><button id="galCancel" class="btn">Annuler</button><button id="galDelete" class="btn danger" disabled aria-label="Supprimer la sélection" style="padding:0 12px"><svg class="ic" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/></svg></button><button id="galShare" class="btn primary" disabled>Partager</button></div>
 </section>
 
 <div id="note" class="note" hidden role="status"></div>
@@ -625,9 +626,15 @@ input:focus,select:focus{outline:2px solid var(--signal);outline-offset:0;border
           <li>Aussi possible depuis l'app : Galerie → bouton <b>Importer</b> (icône image).</li>
         </ol>
         <p class="hint">Si PhotoChantier n'apparaît pas encore dans le menu Partager après la mise à jour, ouvre l'app deux ou trois fois : Android met l'app installée à jour en général dans les 24 h.</p>
+        <h3>Supprimer des photos</h3>
+        <ol>
+          <li>Une photo : ouvre-la dans la galerie, puis <b>Supprimer</b>.</li>
+          <li>Plusieurs : <b>Choisir</b> (ou appui long), coche les photos, puis la <b>poubelle</b>.</li>
+        </ol>
+        <p class="hint">Les photos déjà envoyées vont dans la <b>corbeille du Drive</b> : récupérables pendant 30 jours depuis Google Drive. Les photos en attente sont effacées du téléphone.</p>
         <h3>Confidentialité</h3>
         <p class="muted">Les photos ne vont jamais dans la galerie. Sans réseau, elles attendent dans l'espace privé de l'app, invisible des autres applications, et sont effacées dès qu'elles sont arrivées sur le Drive.</p>
-        <p class="hint mono">PhotoChantier · version 0.8</p>
+        <p class="hint mono">PhotoChantier · version 0.9</p>
       </section>
     </div>
   </div>
@@ -1109,6 +1116,7 @@ async function uploadFile(blob, meta, parent){
 
 /* ---------- File d'envoi ---------- */
 let busy = false, qCount = 0;
+const removed = new Set();
 const done = [];
 async function refreshQueue(){
   const items = await DB.all(); qCount = items.length;
@@ -1130,6 +1138,7 @@ async function processQueue(){
   try {
     const items = (await DB.all()).sort((a, b) => a.created - b.created);
     for (const it of items) {
+      if (removed.has(it.id)) continue;
       try {
         const folder = await ensurePath(it.meta.path);
         const f = await uploadFile(it.blob, it.meta, folder);
@@ -1653,7 +1662,7 @@ function renderGallery(){
   const n = gal.sel.size;
   $('#galBar').hidden = !gal.selMode;
   $('#galCount').textContent = n + (n > 1 ? ' sélectionnées' : ' sélectionnée');
-  $('#galShare').disabled = !n;
+  $('#galShare').disabled = !n; $('#galDelete').disabled = !n;
   $('#galScroll').style.paddingBottom = gal.selMode ? '76px' : '';
 }
 async function driveBlob(id){
@@ -1748,11 +1757,40 @@ async function doShare(){
   }
 }
 
+/* ---------- Suppression de photos ---------- */
+function askDeletePhotos(items){
+  items = items.filter(Boolean); if (!items.length) return;
+  const n = items.length, nd = items.filter(i => i.src === 'drive').length, nl = n - nd;
+  const L = [];
+  if (nd) L.push(`${nd > 1 ? nd + ' photos déjà envoyées iront' : 'La photo déjà envoyée ira'} dans la corbeille du Drive (récupérable${nd > 1 ? 's' : ''} pendant 30 jours).`);
+  if (nl) L.push(`${nl > 1 ? nl + ' photos en attente seront effacées' : 'La photo en attente sera effacée'} du téléphone, sans envoi.`);
+  if (nd && !navigator.onLine) { note('Hors ligne : la suppression des photos du Drive demande du réseau.', 3800); return; }
+  if (nd && !tokenValid()) { note('Session Google expirée : reconnecte-toi pour supprimer des photos du Drive.', 4200); return; }
+  confirmBox(n > 1 ? `Supprimer ${n} photos ?` : 'Supprimer cette photo ?', L.map(esc).join('<br>'), 'Supprimer', () => deletePhotos(items));
+}
+async function deletePhotos(items){
+  let ok = 0, bad = 0, lastErr = '';
+  note(`Suppression de ${items.length} photo${items.length > 1 ? 's' : ''}…`, 10000);
+  for (const it of items) {
+    try {
+      if (it.src === 'local') { removed.add(it.id); await DB.del(it.id); }
+      else await api(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(it.id)}?fields=id,trashed`, {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({trashed:true})});
+      if (blobCache[it.id]) { URL.revokeObjectURL(blobCache[it.id]); delete blobCache[it.id]; }
+      gal.items = gal.items.filter(x => x.key !== it.key); gal.sel.delete(it.key); ok++;
+    } catch (e) { bad++; lastErr = e.status === 403 ? 'droits insuffisants sur ce fichier' : e.message; }
+  }
+  if (viewItem && items.some(i => i.key === viewItem.key) && !gal.items.some(x => x.key === viewItem.key)) closeViewer();
+  if (!gal.sel.size) gal.selMode = false;
+  await refreshQueue(); renderGallery();
+  note(bad ? `${ok} supprimée${ok > 1 ? 's' : ''} · ${bad} échec${bad > 1 ? 's' : ''} : ${lastErr}` : (ok > 1 ? `${ok} photos supprimées` : 'Photo supprimée'), bad ? 5000 : 2800);
+}
+
 function bindGallery(){
   $('#galBack').addEventListener('click', closeGallery);
   $('#galRefresh').addEventListener('click', () => loadGallery(true));
   $('#galSelect').addEventListener('click', () => { gal.selMode = !gal.selMode; if (!gal.selMode) gal.sel.clear(); renderGallery(); });
   $('#galCancel').addEventListener('click', () => { gal.selMode = false; gal.sel.clear(); renderGallery(); });
+  $('#galDelete').addEventListener('click', () => askDeletePhotos([...gal.sel].map(galItem)));
   $('#galShare').addEventListener('click', () => { const items = [...gal.sel].map(galItem).filter(Boolean); if (items.length) openShare(items); });
   $('#galMore').addEventListener('click', () => loadGallery(false));
   $('#galSites').addEventListener('click', e => { const b = e.target.closest('[data-gsite]'); if (!b) return; gal.site = b.dataset.gsite; gal.sel.clear(); gal.tag = null; renderGalSites(); loadGallery(true); });
@@ -1857,13 +1895,14 @@ function bind(){
     }
     const d = e.target.closest('[data-del]');
     if (d) {
-      if (d.dataset.armed) { await DB.del(d.dataset.del); refreshQueue().then(renderQueue); note('Photo supprimée'); return; }
+      if (d.dataset.armed) { removed.add(d.dataset.del); await DB.del(d.dataset.del); refreshQueue().then(renderQueue); note('Photo supprimée'); return; }
       d.dataset.armed = '1'; d.textContent = 'Confirmer ?'; clearTimeout(delTimer);
       delTimer = setTimeout(() => { delete d.dataset.armed; d.textContent = 'Supprimer'; }, 3000);
     }
   });
   $('#viewerClose').addEventListener('click', closeViewer);
   $('#viewerShare').addEventListener('click', () => { if (viewItem) openShare([viewItem]); });
+  $('#viewerDelete').addEventListener('click', () => { if (viewItem) askDeletePhotos([viewItem]); });
   bindGallery();
   $('#sheetQueue').addEventListener('closed', () => { qUrls.forEach(u => URL.revokeObjectURL(u)); qUrls = []; });
 
