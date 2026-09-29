@@ -449,7 +449,7 @@ input[type=date]{min-height:42px;padding:6px 10px;border-radius:10px;border:1px 
 .kind-card small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
 #sheetKind{max-width:880px}
 
-.de{position:fixed;inset:0;z-index:31;background:#0e1012;display:grid;grid-template-rows:auto auto 1fr}
+.de{position:fixed;inset:0;z-index:46;background:#0e1012;display:grid;grid-template-rows:auto auto 1fr}
 .de-top{display:flex;align-items:center;gap:10px;padding:calc(var(--st) + 10px) calc(var(--sr) + 12px) 10px calc(var(--sl) + 12px);background:var(--surface);border-bottom:1px solid var(--line);flex-wrap:wrap}
 .de-top .icon-btn{background:var(--surface2);border:1px solid var(--line)}
 .de-fields{display:flex;gap:8px;flex-wrap:wrap;flex:1;min-width:0}
@@ -492,6 +492,26 @@ input[type=date]{min-height:42px;padding:6px 10px;border-radius:10px;border:1px 
 .dv-bar .btn-row{display:flex;gap:10px;flex-wrap:wrap}
 .dv-bar .btn-row .btn{flex:1 1 150px}
 .doc-prev{width:100%;max-width:360px;height:auto;border-radius:4px;background:#fbfaf6;display:block;margin:0 auto}
+
+.de-body{position:relative}
+.de-imgbar{position:absolute;left:50%;bottom:calc(var(--sb) + 18px);transform:translateX(-50%);z-index:3;display:flex;align-items:center;gap:10px;padding:8px 10px 8px 16px;border-radius:14px;background:var(--surface);border:1px solid var(--signal);box-shadow:0 10px 30px rgba(0,0,0,.5);white-space:nowrap}
+.de-imgbar span{font-size:14px;color:var(--muted)}
+.de-imgbar .btn{min-height:40px;padding:0 12px}
+.dp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}
+.dp-tile{aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:var(--surface2);padding:0}
+.dp-tile img{width:100%;height:100%;object-fit:cover;display:block}
+@media (max-width:700px){.de-imgbar{bottom:calc(var(--sb) + 86px)}}
+@media (min-width:701px){
+  .de-body{grid-template-columns:124px minmax(0,1fr)}
+  .de-tools{display:grid;grid-template-columns:repeat(2,52px);gap:6px;align-content:start;justify-content:center}
+  .de-sep{grid-column:1/-1;width:auto;height:1px}
+}
+@media (max-width:700px){
+  .de-fields{order:3;flex:1 1 100%}
+  #deSave{margin-left:auto}
+  .de-fields>*{flex:1 1 44%!important;max-width:none!important}
+  #deTitle{flex-basis:100%!important}
+}
 </style>
 </head>
 <body>
@@ -788,6 +808,8 @@ input[type=date]{min-height:42px;padding:6px 10px;border-radius:10px;border:1px 
     <div id="deTools" class="de-tools">
       <button class="de-tool on" data-tool="pen" title="Stylo"><svg class="ic" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Stylo</button>
       <button class="de-tool" data-tool="eraser" title="Gomme"><svg class="ic" viewBox="0 0 24 24"><path d="M20 20H9L4 15a2 2 0 0 1 0-3l9-9a2 2 0 0 1 3 0l5 5a2 2 0 0 1 0 3l-8 9"/><path d="M8 11l6 6"/></svg>Gomme</button>
+      <button class="de-tool" id="dePhoto" title="Insérer une photo"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>Photo</button>
+      <button class="de-tool" data-tool="move" title="Déplacer une photo"><svg class="ic" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20M12 2l-3 3M12 2l3 3M12 22l-3-3M12 22l3-3M2 12l3-3M2 12l3 3M22 12l-3-3M22 12l-3 3"/></svg>Déplacer</button>
       <button class="de-tool" data-tool="stamp" title="Case d'action"><svg class="ic" viewBox="0 0 24 24"><rect x="2" y="7" width="9" height="9" rx="1"/><path d="M14 11.5h8M19 8.5l3 3-3 3"/></svg>Action</button>
       <span class="de-sep"></span>
       <button class="de-tool on" data-color="#1d2733" title="Noir"><span class="de-sw" style="background:#1d2733"></span></button>
@@ -804,8 +826,19 @@ input[type=date]{min-height:42px;padding:6px 10px;border-radius:10px;border:1px 
       <button class="de-tool" id="deAddPage" title="Ajouter une page"><svg class="ic" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M12 11v6M9 14h6"/></svg>Page</button>
     </div>
     <div id="dePages" class="de-pages"></div>
+    <div id="deImgBar" class="de-imgbar" hidden><span>Photo sélectionnée</span><button id="deImgDel" class="btn danger"><svg class="ic" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>Retirer</button><button id="deImgDone" class="btn primary">Terminé</button></div>
   </div>
 </section>
+
+<!-- Photo à insérer dans un document -->
+<div id="sheetDocPhoto" class="sheet" hidden role="dialog" aria-labelledby="dpTitle">
+  <div class="sheet-head"><h3 id="dpTitle">Insérer une photo</h3><button class="icon-btn" data-close aria-label="Fermer"><svg class="ic" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+  <div class="sheet-body">
+    <label class="btn primary block file-btn"><svg class="ic" viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="4"/></svg>Prendre ou choisir une photo<input type="file" id="dpFile" accept="image/*"></label>
+    <p id="dpSub" class="imp-label" style="margin:4px 0 0"></p>
+    <div id="dpGrid" class="dp-grid"></div>
+  </div>
+</div>
 
 <!-- Visionneuse de document -->
 <section id="docView" class="panel dv" hidden aria-labelledby="dvTitle">
@@ -817,8 +850,8 @@ input[type=date]{min-height:42px;padding:6px 10px;border-radius:10px;border:1px 
   <div class="dv-bar">
     <small id="dvStatus"></small>
     <div class="btn-row">
-      <button id="dvShare" class="btn primary"><svg class="ic" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>Partager le PDF</button>
-      <a id="dvDrive" class="btn" target="_blank" rel="noopener" hidden>Ouvrir dans Drive</a>
+      <button id="dvEdit" class="btn primary"><svg class="ic" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Modifier</button>
+      <button id="dvShare" class="btn"><svg class="ic" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>Partager en PDF</button>
       <button id="dvDelete" class="btn danger" aria-label="Supprimer le document"><svg class="ic" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/></svg>Supprimer</button>
     </div>
   </div>
@@ -947,13 +980,14 @@ input[type=date]{min-height:42px;padding:6px 10px;border-radius:10px;border:1px 
           <li>Sur la tablette, l'app s'ouvre sur les <b>documents</b> du chantier. Sur le téléphone : bouton <b>document</b> en haut de la caméra.</li>
           <li><b>Nouveau document</b> : PV de séance, rapport journalier, bon de régie, constat ou note libre. Écris au stylet ; la date est toujours en haut.</li>
           <li>Dès que le stylet touche la page, seul le stylet écrit : le doigt fait défiler et la paume est ignorée.</li>
-          <li><b>Enregistrer</b> crée un <b>PDF</b>, rangé sur le Drive dans <span class="mono">Chantier / Documents / type</span>. Sans réseau, il attend dans la file d'envoi.</li>
-          <li>Touche un document pour le voir, le <b>partager en PDF</b> (WhatsApp, e-mail…) ou le supprimer.</li>
+          <li>Bouton <b>Photo</b> : insère une photo (appareil photo, galerie ou photos du chantier). Outil <b>Déplacer</b> : bouge la photo, coin jaune pour la taille.</li>
+          <li><b>Enregistrer</b> range le document sur le Drive dans <span class="mono">Chantier / Documents / type</span>. Il reste <b>modifiable</b> sur la tablette et le téléphone. Sans réseau, il attend dans la file d'envoi.</li>
+          <li>Touche un document pour le voir, le <b>modifier</b>, le <b>partager en PDF</b> (WhatsApp, e-mail…) ou le supprimer.</li>
         </ol>
         <p class="muted">Mise en page : Paramètres › Documents (par défaut) ou fiche du chantier (propre au chantier).</p>
         <h3>Confidentialité</h3>
         <p class="muted">Les photos ne vont jamais dans la galerie. Sans réseau, elles attendent dans l'espace privé de l'app, invisible des autres applications, et sont effacées dès qu'elles sont arrivées sur le Drive.</p>
-        <p class="hint mono">PhotoChantier · version 1.2 bêta</p>
+        <p class="hint mono">PhotoChantier · version 1.3 bêta</p>
       </section>
     </div>
   </div>
@@ -1499,9 +1533,9 @@ async function processQueue(){
       if (removed.has(it.id)) continue;
       try {
         const folder = await ensurePath(it.meta.path);
-        const f = await uploadFile(it.blob, it.meta, folder);
-        await DB.del(it.id); up++;
-        if (it.meta.kind === 'doc') DOCPREV.put({id:f.id, previews:it.previews || [], thumb:it.thumb || '', pages:it.meta.pages || 1});
+        const f = it.meta.kind === 'doc' ? await uploadDoc(it, folder) : await uploadFile(it.blob, it.meta, folder);
+        if (it.meta.kind === 'doc') { const cur = (await DB.all()).find(x => x.id === it.id); if (!cur || cur.created === it.created) await DB.del(it.id); } else await DB.del(it.id);
+        up++;
         done.unshift({name:it.meta.name, path:it.meta.path.join(' / '), link:f.webViewLink || '', thumb:it.thumb});
         await refreshQueue();
       } catch (e) {
@@ -2613,7 +2647,7 @@ const LOGO_EL = {};
 function logoEl(src){
   if (!src) return null;
   let i = LOGO_EL[src];
-  if (!i) { i = new Image(); i.onload = () => { if (!$('#docEditor').hidden) ed.canvases.forEach((_, n) => drawEdPage(n)); drawDocPreviews(); }; i.src = src; LOGO_EL[src] = i; }
+  if (!i) { i = new Image(); i.onload = () => { if (!$('#docEditor').hidden) redrawEd(); drawDocPreviews(); }; i.src = src; LOGO_EL[src] = i; }
   return i.complete && i.naturalWidth ? i : null;
 }
 
@@ -2716,7 +2750,6 @@ function drawHeader(g, doc, pi, pc){
   const sub = [L.site ? siteLabel(site) : '', pi ? `suite · page ${pi + 1}` : ''].filter(Boolean).join('   ·   ');
   if (sub) { g.font = '600 23px Barlow,Arial,sans-serif'; tx(g, fitText(g, sub, right - dw - 30 - left), left, 152, {size:23, weight:600}); }
   ln(g, 60, 190, 940, 190, HEAD, 3);
-  tx(g, 'PhotoChantier', 60, 1386, {size:15, weight:500, color:'#98a3b1'});
   tx(g, `page ${pi + 1} / ${pc}`, 940, 1386, {size:15, weight:500, color:'#98a3b1', align:'right'});
 }
 function drawDoc(g, k, doc, pi, pc){
@@ -2761,7 +2794,7 @@ async function makePdf(canvases, title){
     push(`${im} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${j.w} /Height ${j.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${j.bytes.length} >>\nstream\n`);
     push(j.bytes); push('\nendstream\nendobj\n');
   });
-  obj(info, `<< /Title ${pdfHexStr(title || 'Document')} /Creator ${pdfHexStr('PhotoChantier')} /Producer ${pdfHexStr('PhotoChantier')} >>`);
+  obj(info, `<< /Title ${pdfHexStr(title || 'Document')} >>`);
   const xref = len;
   let x = `xref\n0 ${total}\n0000000000 65535 f \n`;
   for (let i = 1; i < total; i++) x += String(offs[i]).padStart(10, '0') + ' 00000 n \n';
@@ -2769,13 +2802,69 @@ async function makePdf(canvases, title){
   return new Blob(parts, {type:'application/pdf'});
 }
 
-/* aperçus des pages gardés sur l'appareil (documents créés ici) */
-const DOCPREV = {
-  db:null, map:{},
-  async open(){ if (this.db !== null) return this.db; try { this.db = await new Promise((res, rej) => { const r = indexedDB.open('photochantier-docs', 1); r.onupgradeneeded = () => r.result.createObjectStore('prev', {keyPath:'id'}); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); } catch (e) { this.db = false; } return this.db; },
-  async put(v){ this.map[v.id] = v; const db = await this.open(); if (!db) return; try { await new Promise((res, rej) => { const t = db.transaction('prev', 'readwrite'); t.objectStore('prev').put(v); t.oncomplete = res; t.onerror = () => rej(t.error); }); } catch (e) {} },
-  async loadAll(){ const db = await this.open(); if (!db) return this.map; try { const all = await new Promise((res, rej) => { const r = db.transaction('prev').objectStore('prev').getAll(); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); all.forEach(v => this.map[v.id] = v); } catch (e) {} return this.map; }
+/* ---------- Stockage des documents modifiables (sur l'appareil + Drive) ---------- */
+const DOCSTORE = {
+  db:null,
+  async open(){
+    if (this.db !== null) return this.db;
+    try {
+      this.db = await new Promise((res, rej) => {
+        const r = indexedDB.open('photochantier-docs', 2);
+        r.onupgradeneeded = () => { const d = r.result; if (!d.objectStoreNames.contains('docs')) d.createObjectStore('docs', {keyPath:'uid'}); };
+        r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+      });
+    } catch (e) { this.db = false; }
+    return this.db;
+  },
+  mem:{},
+  async tx(mode, fn){
+    const db = await this.open();
+    if (!db) return fn(null);
+    return new Promise((res, rej) => { const t = db.transaction('docs', mode), st = t.objectStore('docs'); let out; const r = fn(st); if (r) r.onsuccess = () => out = r.result; t.oncomplete = () => res(out); t.onerror = () => rej(t.error); });
+  },
+  async get(uid){ try { const db = await this.open(); if (!db) return this.mem[uid] || null; return (await this.tx('readonly', st => st.get(uid))) || null; } catch (e) { return this.mem[uid] || null; } },
+  async put(rec){ this.mem[rec.uid] = rec; try { const db = await this.open(); if (db) await this.tx('readwrite', st => st.put(rec)); } catch (e) {} },
+  async del(uid){ delete this.mem[uid]; try { const db = await this.open(); if (db) await this.tx('readwrite', st => st.delete(uid)); } catch (e) {} },
+  async all(){ try { const db = await this.open(); if (!db) return Object.values(this.mem); return (await this.tx('readonly', st => st.getAll())) || []; } catch (e) { return Object.values(this.mem); } }
 };
+const newUid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const qid = uid => 'doc-' + uid;
+function docFileName(doc, site){ return `${doc.date}_${DOCS[doc.kind].file}_${slug(site ? site.name : 'A-classer')}_${doc.uid.slice(-4)}.json`; }
+function docDescription(doc, site){
+  return [`Chantier : ${siteLabel(site)}`, `Document : ${DOCS[doc.kind].name}`, `Titre : ${doc.title}`, `Date : ${fmtISO(doc.date)}`, `Pages : ${doc.pages.length}`,
+    'Document modifiable dans l’app (tablette ou téléphone). Partage en PDF depuis l’app.'].join('\n');
+}
+async function enqueueDoc(rec){
+  const site = rec.doc.siteId === 'none' ? null : siteById(rec.doc.siteId);
+  const blob = new Blob([JSON.stringify(rec.doc)], {type:'application/json'});
+  removed.delete(qid(rec.uid));
+  await DB.put({id:qid(rec.uid), blob, created:Date.now(), thumb:rec.thumb,
+    meta:{kind:'doc', mime:'application/json', uid:rec.uid, name:docFileName(rec.doc, site), path:[siteFolder(site), 'Documents', DOCS[rec.doc.kind].folder], description:docDescription(rec.doc, site),
+      siteId:site ? site.id : 'none', taken:new Date(rec.doc.date + 'T12:00:00').toISOString(), dtype:rec.doc.kind, title:rec.doc.title, pages:rec.doc.pages.length, tags:[]}, error:''});
+}
+async function driveMultipart(url, method, md, blob, mime){
+  const b = 'pc' + Math.random().toString(36).slice(2);
+  const body = new Blob([`--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n`, JSON.stringify(md), `\r\n--${b}\r\nContent-Type: ${mime}\r\n\r\n`, blob, `\r\n--${b}--`]);
+  return api(url, {method, headers:{'Content-Type':'multipart/related; boundary=' + b}, body});
+}
+async function uploadDoc(it, parent){
+  const m = it.meta, rec = await DOCSTORE.get(m.uid) || {uid:m.uid};
+  const md = {name:m.name, description:m.description, mimeType:'application/json',
+    appProperties:{pc:'1', kind:'doc', uid:m.uid, dtype:m.dtype, site:m.siteId || 'none', taken:m.taken || '', title:String(m.title || '').slice(0, 50)}};
+  if (it.thumb) md.contentHints = {thumbnail:{image:it.thumb.split(',')[1].replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''), mimeType:'image/jpeg'}};
+  let f;
+  if (rec.driveId && rec.parentId === parent) {
+    try { f = await driveMultipart(`https://www.googleapis.com/upload/drive/v3/files/${encodeURIComponent(rec.driveId)}?uploadType=multipart&fields=id,name,webViewLink,modifiedTime`, 'PATCH', md, it.blob, 'application/json'); }
+    catch (e) { if (e.status !== 404) throw e; }
+  }
+  if (!f) {
+    f = await driveMultipart('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink,modifiedTime', 'POST', {...md, parents:[parent]}, it.blob, 'application/json');
+    if (rec.driveId) { try { await api(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(rec.driveId)}?fields=id`, {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({trashed:true})}); } catch (e) {} }
+  }
+  const cur = await DOCSTORE.get(m.uid);
+  if (cur) await DOCSTORE.put({...cur, driveId:f.id, parentId:parent, dirty:cur.saved > it.created ? cur.dirty : false, modified:f.modifiedTime || new Date().toISOString()});
+  return f;
+}
 
 /* ---------- Bureau (tablette) : explorateur de documents ---------- */
 const desk = {site:null, items:[], err:null, loading:false, token:0};
@@ -2798,33 +2887,62 @@ function renderDeskSites(){
   const b = (id, s) => `<button class="dk-site ${desk.site === id ? 'on' : ''}" data-dsite="${esc(id)}">${s ? logoHTML(s) : '<span class="slogo none" aria-hidden="true">?</span>'}<span class="t"><b>${esc(s ? s.name : 'À classer')}</b><small>${s ? esc(s.number || '') + (c && c.id === s.id ? ' · ● ici' : '') : 'hors chantier'}</small></span></button>`;
   $('#dkSites').innerHTML = S.sites.map(s => b(s.id, s)).join('') + b('__none', null);
 }
-function docLocalItem(it){
-  return {key:'l' + it.id, src:'local', id:it.id, name:it.meta.name, title:it.meta.title, dtype:it.meta.dtype || 'libre', date:(it.meta.taken || '').slice(0, 10) || todayISO(),
-    siteId:it.meta.siteId || 'none', blob:it.blob, thumb:it.thumb || '', previews:it.previews || [], pages:it.meta.pages || 1, link:'', error:it.error || ''};
+function recItem(r){
+  return {key:'u' + r.uid, uid:r.uid, src:r.demo ? 'demo' : 'local', title:r.doc.title, dtype:r.doc.kind, date:r.doc.date, siteId:r.doc.siteId, thumb:r.thumb || '',
+    pages:r.doc.pages.length, dirty:!!r.dirty, driveId:r.driveId || ''};
 }
-function docDriveItem(f){
+function driveDocItem(f){
   const ap = f.appProperties || {};
-  return {key:'d' + f.id, src:'drive', id:f.id, name:f.name, title:ap.title || f.name.replace(/\.pdf$/i, ''), dtype:DOCS[ap.dtype] ? ap.dtype : 'libre',
+  return {key:'u' + (ap.uid || f.id), uid:ap.uid || '', src:'drive', title:ap.title || f.name, dtype:DOCS[ap.dtype] ? ap.dtype : 'libre',
     date:(ap.taken || f.createdTime || '').slice(0, 10), siteId:ap.site || 'none', thumb:f.thumbnailLink ? f.thumbnailLink.replace(/=s\d+$/, '=s400') : '',
-    big:f.thumbnailLink ? f.thumbnailLink.replace(/=s\d+$/, '=s1600') : '', link:f.webViewLink || '', previews:[]};
+    pages:0, driveId:f.id, modified:f.modifiedTime || ''};
+}
+async function seedDemo(){
+  if (!DEMO || tokenValid()) return;
+  try { if (localStorage.getItem('photochantier.demodocs')) return; localStorage.setItem('photochantier.demodocs', '1'); } catch (e) { return; }
+  const site = S.sites[0]; if (!site) return;
+  const d = n => { const x = new Date(Date.now() - n * 864e5); return x.getFullYear() + '-' + pad2(x.getMonth() + 1) + '-' + pad2(x.getDate()); };
+  const hw = (g, t, x, y, s = 30) => tx(g, t, x, y, {size:s, weight:500, italic:true, color:'#1f3a8a'});
+  const layer = draw => { const c = document.createElement('canvas'); c.width = PW; c.height = PH; const g = c.getContext('2d'); draw(g); return c.toDataURL('image/png'); };
+  const mk = async (kind, date, draw) => {
+    const doc = {v:1, uid:newUid(), kind, title:docTitle(kind), date, siteId:site.id, bg:null, pages:[{s:[], i:[{id:'h' + newUid(), src:layer(draw), x:0, y:0, w:PW, h:PH, lock:true}]}]};
+    const rec = {uid:doc.uid, doc, demo:true, dirty:false, saved:Date.now()};
+    rec.thumb = await docThumb(doc);
+    await DOCSTORE.put(rec);
+  };
+  await mk('pv', d(1), g => { hw(g, 'Baraque de chantier', 140, 256); hw(g, '14h00', 680, 256); hw(g, 'DT, maître d’ouvrage, chef d’équipe', 240, 310);
+    hw(g, '1. Plans d’exécution à recevoir en PDF', 80, 490); hw(g, '2. Rapport de chantier pour lundi', 80, 546);
+    hw(g, 'Mail à la DT : plans en PDF', 132, 1106, 24); hw(g, 'Joel', 672, 1106, 24); hw(g, 'demain', 842, 1106, 24);
+    hw(g, 'Commander bidim pour fouilles', 132, 1152, 24); hw(g, 'Chef éq.', 672, 1152, 24); hw(g, 'vendredi', 842, 1152, 24); });
+  await mk('journal', d(0), g => { hw(g, 'X', 266, 263, 26); hw(g, '14', 845, 256); hw(g, '1', 440, 362, 26); hw(g, '4', 440, 404, 26); hw(g, '34', 610, 404, 26);
+    hw(g, 'Pelle 14 t, dumper, plaque vibrante', 280, 576); hw(g, 'Fouille réseau EU, tronçon R3–R4 (32 m)', 80, 750); hw(g, 'Pose tuyaux PVC 250, remblayage partiel', 80, 806); hw(g, 'Bidim 150 m²', 80, 1060); });
+  await mk('regie', d(4), g => { hw(g, '014', 200, 256); hw(g, 'DT', 620, 256); hw(g, 'Dépose et repose bordure devant n° 12', 190, 310);
+    hw(g, 'Maçon', 80, 486, 26); hw(g, 'CFC', 480, 486, 26); hw(g, '3.5', 780, 486, 26); hw(g, 'Mini-pelle 3 t', 80, 756, 26); hw(g, '2', 780, 756, 26);
+    hw(g, 'Béton C25/30', 80, 940, 26); hw(g, '0.4', 600, 940, 26); hw(g, 'm³', 780, 940, 26); });
 }
 async function loadDocs(){
   const tok = ++desk.token, sid = desk.site === '__none' ? 'none' : desk.site;
   desk.loading = true; desk.err = null;
-  const local = (await DB.all()).filter(it => it.meta.kind === 'doc' && (it.meta.siteId || 'none') === sid).map(docLocalItem);
+  await seedDemo();
+  const recs = (await DOCSTORE.all()).filter(r => r.doc && r.uid !== '__draft' && (r.doc.siteId || 'none') === sid);
+  const local = recs.map(recItem);
   desk.items = local; renderDesk();
   let more = [];
-  if (DEMO && !tokenValid()) { more = (await demoDocs()).filter(d => d.siteId === sid); desk.err = 'Aperçu : documents d’exemple. Dans l’app, tu verras les documents de ton Drive.'; }
+  if (DEMO && !tokenValid()) desk.err = 'Aperçu : documents d’exemple. Dans l’app, tu verras aussi les documents de ton Drive.';
   else {
     const r = queueReason();
-    if (r && r.a !== null) desk.err = r.t + ' · seuls les documents en attente sont visibles';
-    else if (!navigator.onLine) desk.err = 'Hors ligne · seuls les documents en attente sont visibles';
+    if (r && r.a !== null) desk.err = r.t + ' · documents de cet appareil seulement';
+    else if (!navigator.onLine) desk.err = 'Hors ligne · documents de cet appareil seulement';
     else {
       try {
-        const q = `trashed=false and mimeType='application/pdf' and appProperties has { key='pc' and value='1' } and appProperties has { key='site' and value='${qEsc(sid)}' }`;
-        const res = await api('https://www.googleapis.com/drive/v3/files?' + new URLSearchParams({q, orderBy:'createdTime desc', pageSize:'200', fields:'files(id,name,thumbnailLink,webViewLink,createdTime,appProperties)'}));
-        const pv = await DOCPREV.loadAll();
-        more = (res.files || []).map(docDriveItem).map(d => pv[d.id] ? {...d, previews:pv[d.id].previews || [], thumb:d.thumb || pv[d.id].thumb, pages:pv[d.id].pages || 1} : d);
+        const q = `trashed=false and mimeType='application/json' and appProperties has { key='kind' and value='doc' } and appProperties has { key='site' and value='${qEsc(sid)}' }`;
+        const res = await api('https://www.googleapis.com/drive/v3/files?' + new URLSearchParams({q, orderBy:'modifiedTime desc', pageSize:'300', fields:'files(id,name,thumbnailLink,modifiedTime,createdTime,appProperties)'}));
+        const known = new Map(recs.map(r => [r.uid, r]));
+        for (const f of res.files || []) {
+          const it = driveDocItem(f), rec = known.get(it.uid);
+          if (!rec) more.push(it);
+          else { const li = local.find(x => x.uid === it.uid); if (li) { li.driveId = f.id; if (!rec.dirty && f.modifiedTime && rec.modified && f.modifiedTime > rec.modified) li.stale = true; if (!li.thumb) li.thumb = it.thumb; } }
+        }
       } catch (e) { desk.err = 'Lecture du Drive impossible : ' + e.message; }
     }
   }
@@ -2842,124 +2960,166 @@ function renderDesk(){
     return `<section class="dk-sec" id="dks-${t}"><div class="dk-sep"><h3>${esc(d.name)}</h3><span class="n">${list.length}</span><span class="p">${esc(d.purpose)}</span><button class="btn" data-dnew="${t}"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nouveau</button></div>
       ${list.length ? `<div class="dk-grid">${list.map(docCard).join('')}</div>` : `<p class="dk-empty">${desk.loading ? 'Chargement…' : 'Aucun document.'}</p>`}</section>`;
   }).join('');
-  $$('#dkList img[data-fallback]').forEach(i => i.addEventListener('error', () => { i.replaceWith(Object.assign(document.createElement('span'), {className:'dk-noimg', textContent:'PDF'})); }, {once:true}));
+  $$('#dkList img[data-fallback]').forEach(i => i.addEventListener('error', () => { i.replaceWith(Object.assign(document.createElement('span'), {className:'dk-noimg', textContent:'DOC'})); }, {once:true}));
 }
 function docCard(it){
-  const st = it.src === 'local' ? (it.error ? '<span class="dk-st err">Échec d’envoi</span>' : '<span class="dk-st wait">En attente</span>') : it.src === 'demo' ? '<span class="dk-st">Exemple</span>' : '<span class="dk-st ok">Sur le Drive</span>';
-  return `<button class="dk-card" data-doc="${esc(it.key)}">${it.thumb ? `<img alt="" loading="lazy" src="${esc(it.thumb)}" data-fallback="1">` : '<span class="dk-noimg">PDF</span>'}<span class="dk-meta"><b>${esc(it.title)}</b><small>${fmtISO(it.date)}${it.pages > 1 ? ' · ' + it.pages + ' pages' : ''}</small>${st}</span></button>`;
+  const st = it.src === 'demo' ? '<span class="dk-st">Exemple</span>' : it.src === 'drive' ? '<span class="dk-st ok">Sur le Drive</span>'
+    : it.dirty ? '<span class="dk-st wait">À envoyer</span>' : '<span class="dk-st ok">Sur le Drive</span>';
+  return `<button class="dk-card" data-doc="${esc(it.key)}">${it.thumb ? `<img alt="" loading="lazy" src="${esc(it.thumb)}" data-fallback="1">` : '<span class="dk-noimg">DOC</span>'}<span class="dk-meta"><b>${esc(it.title)}</b><small>${fmtISO(it.date)}${it.pages > 1 ? ' · ' + it.pages + ' pages' : ''}</small>${st}</span></button>`;
 }
 
-/* ---------- Exemples (aperçu uniquement) ---------- */
-let demoCache = null;
-async function demoDocs(){
-  if (demoCache) return demoCache;
-  const site = S.sites[0]; if (!site) return demoCache = [];
-  const mk = async (kind, date, write) => {
-    const lay = effLay(docLayFor(site), kind), doc = {kind, lay, title:docTitle(kind), date, site};
-    const pageAt = w => { const c = document.createElement('canvas'), k = w / PW; c.width = w; c.height = Math.round(PH * k); const g = c.getContext('2d'); drawDoc(g, k, doc, 0, 1); g.setTransform(k, 0, 0, k, 0, 0); write(g); return c; };
-    const blob = await makePdf([pageAt(1240)], doc.title);
-    return {key:'x' + kind + date, src:'demo', id:kind + date, name:`${date}_${DOCS[kind].file}_${slug(site.name)}.pdf`, title:doc.title, dtype:kind, date, siteId:site.id, blob,
-      thumb:pageAt(300).toDataURL('image/jpeg', .8), previews:[pageAt(760).toDataURL('image/jpeg', .85)], pages:1, link:''};
-  };
-  const hw = (g, t, x, y, s = 30) => tx(g, t, x, y, {size:s, weight:500, italic:true, color:'#1f3a8a'});
-  const d = n => { const x = new Date(Date.now() - n * 864e5); return x.getFullYear() + '-' + pad2(x.getMonth() + 1) + '-' + pad2(x.getDate()); };
-  demoCache = [
-    await mk('pv', d(1), g => { hw(g, 'Baraque de chantier', 140, 256); hw(g, '14h00', 680, 256); hw(g, 'DT, maître d’ouvrage, chef d’équipe', 240, 310);
-      hw(g, '1. Plans d’exécution à recevoir en PDF', 80, 490); hw(g, '2. Rapport de chantier pour lundi', 80, 546); hw(g, '3. Chef d’équipe : 079 737 25 93', 80, 602);
-      g.strokeStyle = '#1f3a8a'; g.lineWidth = 3; [0, 1].forEach(i => { const y = 1030 + 46 * (i + 1) + 11; g.beginPath(); g.moveTo(74, y + 2); g.lineTo(94, y + 22); g.moveTo(94, y + 2); g.lineTo(74, y + 22); g.stroke(); });
-      hw(g, 'Mail à la DT : plans en PDF', 132, 1106, 24); hw(g, 'Joel', 672, 1106, 24); hw(g, '29.09', 842, 1106, 24);
-      hw(g, 'Rapport de chantier', 132, 1152, 24); hw(g, 'Joel', 672, 1152, 24); hw(g, 'lundi', 842, 1152, 24);
-      hw(g, 'Commander bidim pour fouilles', 132, 1198, 24); hw(g, 'Chef éq.', 672, 1198, 24); hw(g, '02.10', 842, 1198, 24); }),
-    await mk('journal', d(0), g => { g.strokeStyle = '#1f3a8a'; g.lineWidth = 3; g.beginPath(); g.moveTo(262, 246); g.lineTo(282, 266); g.moveTo(282, 246); g.lineTo(262, 266); g.stroke();
-      hw(g, '14', 845, 256); hw(g, '1', 440, 362, 26); hw(g, '9', 34 + 400, 404, 26); hw(g, '76', 610, 404, 26); hw(g, '2', 440, 446, 26); hw(g, '17', 610, 446, 26);
-      hw(g, 'Pelle 14 t, dumper, plaque vibrante', 280, 576); hw(g, 'Fouille réseau EU, tronçon R3–R4 (32 m)', 80, 750); hw(g, 'Pose tuyaux PVC 250, remblayage partiel', 80, 806); hw(g, 'Bidim 150 m² — Frei SA', 80, 1060); }),
-    await mk('regie', d(4), g => { hw(g, '014', 200, 256); hw(g, 'DT — M. Roux', 620, 256); hw(g, 'Dépose et repose bordure devant n° 12', 190, 310);
-      hw(g, 'Silva', 80, 486, 26); hw(g, 'Maçon', 480, 486, 26); hw(g, '3.5', 780, 486, 26); hw(g, 'Costa', 80, 528, 26); hw(g, 'Manœuvre', 480, 528, 26); hw(g, '3.5', 780, 528, 26);
-      hw(g, 'Mini-pelle 3 t', 80, 756, 26); hw(g, '2', 780, 756, 26); hw(g, 'Béton C25/30', 80, 940, 26); hw(g, '0.4', 600, 940, 26); hw(g, 'm³', 780, 940, 26); })
-  ];
-  return demoCache;
+/* ---------- Ouverture d'un document (appareil ou Drive) ---------- */
+async function getDocRec(it){
+  let rec = it.uid ? await DOCSTORE.get(it.uid) : null;
+  if (rec && !it.stale) return rec;
+  if (!it.driveId) return rec;
+  const res = await api(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(it.driveId)}?alt=media`);
+  const doc = res && typeof res.json === 'function' ? await res.json() : res;
+  if (!doc || !doc.pages) throw new Error('fichier illisible');
+  doc.uid = doc.uid || it.uid || newUid();
+  rec = {uid:doc.uid, doc, driveId:it.driveId, dirty:false, saved:Date.now(), modified:it.modified || new Date().toISOString(), thumb:it.thumb || ''};
+  rec.thumb = await docThumb(doc);
+  await DOCSTORE.put(rec);
+  return rec;
 }
+function docRender(doc, i, w, sel){
+  const c = document.createElement('canvas'), k = w / PW; c.width = w; c.height = Math.round(PH * k);
+  drawPageOf(c.getContext('2d'), k, doc, i, sel);
+  return c;
+}
+function waitImgs(doc){
+  const ps = [];
+  for (const p of doc.pages) for (const im of p.i || []) { const el = imgEl(im); if (!el.complete) ps.push(new Promise(r => { el.addEventListener('load', r, {once:true}); el.addEventListener('error', r, {once:true}); })); }
+  return Promise.all(ps);
+}
+async function docThumb(doc){ await waitImgs(doc); return docRender(doc, 0, 300).toDataURL('image/jpeg', .8); }
 
 /* ---------- Visionneuse de document, partage PDF, suppression ---------- */
 let docCur = null;
 function findDoc(key){ return desk.items.find(i => i.key === key) || null; }
-function openDocView(it){
-  docCur = it;
+async function openDocView(it){
+  docCur = {it, rec:null};
   const s = siteById(it.siteId);
   $('#dvTitle').textContent = it.title;
   $('#dvSub').textContent = [DOCS[it.dtype].name, fmtISO(it.date), s ? siteLabel(s) : 'À classer'].join(' · ');
-  const imgs = it.previews && it.previews.length ? it.previews : (it.big ? [it.big] : []);
-  $('#dvPages').innerHTML = imgs.length ? imgs.map((u, i) => `<img alt="Page ${i + 1}" src="${esc(u)}">`).join('') + (it.src === 'drive' ? '<p class="hint">Aperçu de la première page. « Ouvrir dans Drive » affiche le PDF complet.</p>' : '')
-    : '<p class="hint">Aperçu indisponible. Ouvre le PDF dans Drive.</p>';
-  $('#dvStatus').textContent = it.src === 'local' ? (it.error ? 'Échec d’envoi : ' + it.error : 'En attente d’envoi vers le Drive') : it.src === 'demo' ? 'Document d’exemple' : 'Sur le Drive · ' + it.name;
-  const a = $('#dvDrive'); a.hidden = !it.link; if (it.link) a.href = it.link;
+  $('#dvStatus').textContent = 'Ouverture…';
+  $('#dvPages').innerHTML = '';
   $('#docView').hidden = false;
+  try {
+    const rec = await getDocRec(it); if (!rec) throw new Error('document introuvable sur cet appareil');
+    if (!docCur || docCur.it !== it) return;
+    docCur.rec = rec;
+    await waitImgs(rec.doc);
+    $('#dvPages').innerHTML = '';
+    rec.doc.pages.forEach((_, i) => { const im = new Image(); im.alt = 'Page ' + (i + 1); im.src = docRender(rec.doc, i, 900).toDataURL('image/jpeg', .88); $('#dvPages').append(im); });
+    $('#dvStatus').textContent = rec.demo ? 'Document d’exemple · modifiable' : rec.dirty ? 'Modifié sur cet appareil · envoi vers le Drive en attente' : 'Sur le Drive · modifiable sur la tablette et le téléphone';
+  } catch (e) { $('#dvStatus').textContent = 'Ouverture impossible : ' + e.message; }
 }
 function closeDocView(){ $('#docView').hidden = true; docCur = null; }
-const pdfCache = {};
-async function docPdf(it){
-  if (it.blob) return it.blob;
-  if (pdfCache[it.id]) return pdfCache[it.id];
-  return pdfCache[it.id] = await (await api(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(it.id)}?alt=media`)).blob();
+async function docToPdf(doc){
+  await waitImgs(doc);
+  return makePdf(doc.pages.map((_, i) => docRender(doc, i, 1240)), doc.title);
 }
-async function shareDoc(it){
-  const s = siteById(it.siteId);
+async function shareDocRec(rec){
+  const doc = rec.doc, s = doc.siteId === 'none' ? null : siteById(doc.siteId);
+  note('Création du PDF…', 8000);
   let blob;
-  try { if (!it.blob && !pdfCache[it.id]) note('Préparation du PDF…', 8000); blob = await docPdf(it); }
-  catch (e) { note('PDF indisponible : ' + e.message, 4000); return; }
-  const file = new File([blob], it.name.endsWith('.pdf') ? it.name : it.name + '.pdf', {type:'application/pdf'});
-  const text = `${it.title} · ${s ? siteLabel(s) : 'À classer'} · ${fmtISO(it.date)}`;
+  try { blob = await docToPdf(doc); } catch (e) { note('PDF impossible : ' + e.message, 4000); return; }
+  const file = new File([blob], `${doc.date}_${DOCS[doc.kind].file}_${slug(s ? s.name : 'A-classer')}.pdf`, {type:'application/pdf'});
+  const text = `${doc.title} · ${siteLabel(s)} · ${fmtISO(doc.date)}`;
   if (navigator.canShare && navigator.canShare({files:[file]})) {
     try { await navigator.share({files:[file], title:text, text}); $('#note').hidden = true; }
     catch (e) {
-      if (e.name === 'NotAllowedError') note('PDF prêt. Touche encore « Partager ».', 3500);
+      if (e.name === 'NotAllowedError') { shareReady = {file, text}; note('PDF prêt. Touche encore « Partager en PDF ».', 3800); }
       else if (e.name !== 'AbortError') note(IN_FRAME ? 'Partage bloqué dans cet aperçu. Il fonctionne dans l’app installée.' : 'Partage impossible : ' + e.message, 4000);
+      else $('#note').hidden = true;
     }
     return;
   }
-  if (IN_FRAME) { note('Partage bloqué dans cet aperçu. Dans l’app installée : menu Android (WhatsApp, e-mail…).', 4200); return; }
+  if (IN_FRAME) { note('PDF créé (' + Math.round(blob.size / 1024) + ' Ko). Le partage est bloqué dans cet aperçu ; dans l’app : WhatsApp, e-mail…', 4800); return; }
   const u = URL.createObjectURL(blob), a = Object.assign(document.createElement('a'), {href:u, download:file.name});
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 30000);
   note('Partage non disponible ici : PDF téléchargé.', 3500);
 }
+let shareReady = null;
+async function shareDocItem(it){
+  if (shareReady) { const r = shareReady; shareReady = null; try { await navigator.share({files:[r.file], title:r.text, text:r.text}); return; } catch (e) {} }
+  try { const rec = docCur && docCur.it === it && docCur.rec ? docCur.rec : await getDocRec(it); if (rec) shareDocRec(rec); }
+  catch (e) { note('Document indisponible : ' + e.message, 4000); }
+}
 function askDeleteDoc(it){
-  if (it.src === 'drive' && !navigator.onLine) { note('Hors ligne : la suppression demande du réseau.', 3500); return; }
-  confirmBox('Supprimer ce document ?', `« ${esc(it.title)} » du ${fmtISO(it.date)}.<small>${it.src === 'drive' ? 'Le PDF va dans la corbeille du Drive (récupérable 30 jours).' : it.src === 'local' ? 'Le document en attente est effacé de l’app, sans envoi.' : 'Document d’exemple.'}</small>`, 'Supprimer', async () => {
+  if (it.driveId && !navigator.onLine) { note('Hors ligne : la suppression demande du réseau.', 3500); return; }
+  confirmBox('Supprimer ce document ?', `« ${esc(it.title)} » du ${fmtISO(it.date)}.<small>${it.driveId ? 'Il va dans la corbeille du Drive (récupérable 30 jours).' : 'Il est effacé de l’app.'}</small>`, 'Supprimer', async () => {
     try {
-      if (it.src === 'local') { removed.add(it.id); await DB.del(it.id); await refreshQueue(); }
-      else if (it.src === 'drive') await api(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(it.id)}?fields=id,trashed`, {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({trashed:true})});
-      else demoCache = (demoCache || []).filter(d => d.key !== it.key);
+      if (it.driveId && tokenValid()) await api(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(it.driveId)}?fields=id,trashed`, {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({trashed:true})});
+      if (it.uid) { removed.add(qid(it.uid)); await DB.del(qid(it.uid)); await DOCSTORE.del(it.uid); await refreshQueue(); }
       desk.items = desk.items.filter(d => d.key !== it.key);
-      if (docCur && docCur.key === it.key) closeDocView();
+      if (docCur && docCur.it.key === it.key) closeDocView();
       renderDesk(); note('Document supprimé');
     } catch (e) { note('Suppression impossible : ' + e.message, 4000); }
   });
 }
 
 /* ---------- Éditeur manuscrit ---------- */
-const ed = {pages:[], doc:null, tool:'pen', color:'#1d2733', size:2.8, undo:[], redo:[], penSeen:false, canvases:[]};
+const ed = {pages:[], imgs:[], doc:null, uid:null, isNew:true, tool:'pen', color:'#1d2733', size:2.8, undo:[], redo:[], penSeen:false, canvases:[], sel:null, dirty:false};
 const BGN = {plain:'Blanc', lined:'Ligné', grid:'Quadrillé'};
-const DRAFT_KEY = 'photochantier.docdraft';
-function draftGet(){ try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch (e) { return null; } }
-function edDocObj(){ const site = ed.doc.siteId === 'none' ? null : siteById(ed.doc.siteId); return {kind:ed.doc.kind, lay:effLay({...docLayFor(site), ...(ed.doc.bg ? {bg:ed.doc.bg} : {})}, ed.doc.kind), title:ed.doc.title, date:ed.doc.date, site}; }
-function openEditor(kind, siteId){
+if (location.hostname === 'localhost') window.__ed = ed;
+const IMG_EL = {};
+function imgEl(im){
+  let el = IMG_EL[im.id];
+  if (!el) { el = new Image(); el.onload = () => { if (!$('#docEditor').hidden) redrawEd(); }; el.src = im.src; IMG_EL[im.id] = el; }
+  return el;
+}
+function layOfDoc(doc){ const site = doc.siteId === 'none' ? null : siteById(doc.siteId); return {site, lay:effLay({...docLayFor(site), ...(doc.bg ? {bg:doc.bg} : {})}, doc.kind)}; }
+function drawPageOf(g, k, doc, i, sel){
+  const {site, lay} = layOfDoc(doc);
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  drawDoc(g, k, {kind:doc.kind, lay, title:doc.title, date:doc.date, site}, i, doc.pages.length);
+  g.setTransform(k, 0, 0, k, 0, 0);
+  const pg = doc.pages[i];
+  for (const im of pg.i || []) { const el = imgEl(im); if (el.complete && el.naturalWidth) g.drawImage(el, im.x, im.y, im.w, im.h); }
+  for (const s of pg.s || []) drawStroke(g, s);
+  if (sel && sel.page === i) {
+    const im = sel.img; g.save(); g.setLineDash([12, 8]); g.strokeStyle = '#f2c230'; g.lineWidth = 4; g.strokeRect(im.x, im.y, im.w, im.h); g.setLineDash([]);
+    g.fillStyle = '#f2c230'; g.fillRect(im.x + im.w - 34, im.y + im.h - 34, 40, 40); g.fillStyle = '#1b1600'; g.font = '700 30px Barlow,Arial,sans-serif'; g.fillText('⤡', im.x + im.w - 30, im.y + im.h - 5); g.restore();
+  }
+}
+function edDoc(){ return {...ed.doc, uid:ed.uid, pages:ed.pages.map((s, i) => ({s, i:ed.imgs[i] || []}))}; }
+function drawEdPage(i, target, scale){
+  const c = target || ed.canvases[i]; if (!c) return;
+  const k = scale || c.width / PW;
+  drawPageOf(c.getContext('2d'), k, edDoc(), i, target ? null : ed.sel);
+}
+const redrawEd = () => ed.canvases.forEach((_, i) => drawEdPage(i));
+function docFromRec(rec){ return {pages:rec.doc.pages.map(p => (p.s || []).slice()), imgs:rec.doc.pages.map(p => (p.i || []).map(x => ({...x})))}; }
+async function openEditor(kind, siteId, rec){
   $('#deSite').innerHTML = S.sites.map(s => `<option value="${esc(s.id)}">${esc(siteLabel(s))}</option>`).join('') + '<option value="none">À classer</option>';
   $('#deKind').innerHTML = DOC_ORDER.map(t => `<option value="${t}">${esc(DOCS[t].name)}</option>`).join('');
-  const d = draftGet();
-  if (d && d.doc && d.pages && d.pages.some(p => p.length) && (!kind || d.doc.kind === kind)) {
-    ed.pages = d.pages; ed.doc = d.doc; if (ed.doc.siteId !== 'none' && !siteById(ed.doc.siteId)) ed.doc.siteId = 'none';
-    setTimeout(() => note('Brouillon repris là où tu l’avais laissé', 2600), 150);
+  const draft = await DOCSTORE.get('__draft');
+  const draftFor = draft && draft.doc && (rec ? draft.doc.uid === rec.uid : !draft.existing && (!kind || draft.doc.kind === kind));
+  const src = draftFor ? draft : rec;
+  if (src) {
+    const p = docFromRec(src); ed.pages = p.pages; ed.imgs = p.imgs;
+    ed.doc = {kind:src.doc.kind, title:src.doc.title, date:src.doc.date, siteId:src.doc.siteId, bg:src.doc.bg || null};
+    ed.uid = src.doc.uid; ed.isNew = !rec && !(draft && draft.existing); ed.dirty = !!draftFor;
+    if (ed.doc.siteId !== 'none' && !siteById(ed.doc.siteId)) ed.doc.siteId = 'none';
+    if (draftFor) setTimeout(() => note('Brouillon repris là où tu l’avais laissé', 2600), 150);
   } else {
     kind = kind || 'pv';
-    ed.pages = [[]]; ed.doc = {kind, title:docTitle(kind), date:todayISO(), siteId:siteId && siteId !== '__none' ? siteId : 'none', bg:null};
+    ed.pages = [[]]; ed.imgs = [[]]; ed.uid = newUid(); ed.isNew = true; ed.dirty = false;
+    ed.doc = {kind, title:docTitle(kind), date:todayISO(), siteId:siteId && siteId !== '__none' ? siteId : 'none', bg:null};
   }
   $('#deSite').value = ed.doc.siteId; $('#deKind').value = ed.doc.kind; $('#deDate').value = ed.doc.date; $('#deTitle').value = ed.doc.title;
-  ed.undo = []; ed.redo = [];
-  $('#deBgT').textContent = BGN[edDocObj().lay.bg];
+  ed.undo = []; ed.redo = []; ed.sel = null; setEdTool('pen');
+  $('#deBgT').textContent = BGN[layOfDoc(ed.doc).lay.bg];
+  $('#deSave').lastChild.textContent = ed.isNew ? 'Enregistrer' : 'Enregistrer les modifications';
   $('#docEditor').hidden = false;
-  buildEdPages(); updEdStatus(); updUndo();
+  buildEdPages(); updEdStatus(); updUndo(); updImgBar();
 }
-function closeEditor(){ saveDraft(true); $('#docEditor').hidden = true; if (ed.pages.some(p => p.length)) note('Brouillon gardé dans l’app', 2400); }
+function closeEditor(){
+  if (ed.dirty) { saveDraft(true); note('Brouillon gardé dans l’app', 2400); } else dropDraft();
+  $('#docEditor').hidden = true;
+}
 function buildEdPages(){
   const box = $('#dePages'); box.innerHTML = ''; ed.canvases = [];
   ed.pages.forEach((_, i) => addEdCanvas(i));
@@ -2980,15 +3140,6 @@ function resizeEdPages(){
     drawEdPage(i);
   });
 }
-function drawEdPage(i, target, scale){
-  const c = target || ed.canvases[i]; if (!c) return;
-  const g = c.getContext('2d'), k = scale || c.width / PW;
-  g.setTransform(1, 0, 0, 1, 0, 0);
-  drawDoc(g, k, edDocObj(), i, ed.pages.length);
-  g.setTransform(k, 0, 0, k, 0, 0);
-  for (const s of ed.pages[i]) drawStroke(g, s);
-}
-const redrawEd = () => ed.canvases.forEach((_, i) => drawEdPage(i));
 function updEdStatus(){
   $('#deStatus').classList.toggle('pen', ed.penSeen);
   $('#deStatusT').textContent = ed.penSeen
@@ -2996,19 +3147,38 @@ function updEdStatus(){
     : 'Stylet pas encore détecté · le doigt écrit. Pose le stylet sur la page pour activer le rejet de la paume.';
 }
 function updUndo(){ $('#deUndo').disabled = !ed.undo.length; $('#deRedo').disabled = !ed.redo.length; }
+function updImgBar(){ $('#deImgBar').hidden = !ed.sel; }
 let draftT = 0;
+async function dropDraft(){ const d = await DOCSTORE.get('__draft'); if (d && d.doc && d.doc.uid === ed.uid) await DOCSTORE.del('__draft'); }
 function saveDraft(now){
+  ed.dirty = true;
   clearTimeout(draftT);
-  const w = () => { try { localStorage.setItem(DRAFT_KEY, JSON.stringify({pages:ed.pages, doc:ed.doc})); } catch (e) {} };
-  if (now === true) w(); else draftT = setTimeout(w, 300);
+  const w = () => DOCSTORE.put({uid:'__draft', existing:!ed.isNew, doc:edDoc(), saved:Date.now()});
+  if (now === true) return w(); draftT = setTimeout(w, 400);
+}
+function pushOp(op){ ed.undo.push(op); ed.redo = []; updUndo(); saveDraft(); }
+function hitImg(page, p){
+  const list = ed.imgs[page] || [];
+  for (let j = list.length - 1; j >= 0; j--) { const im = list[j]; if (im.lock) continue; if (p[0] >= im.x && p[0] <= im.x + im.w && p[1] >= im.y && p[1] <= im.y + im.h) return im; }
+  return null;
 }
 function bindEdCanvas(c){
-  let drawing = null, scroll = null, erasing = null;
+  let drawing = null, scroll = null, erasing = null, moving = null;
   const cap = id => { try { c.setPointerCapture(id); } catch (e) {} };
   const pt = e => { const r = c.getBoundingClientRect(); return [(e.clientX - r.left) / r.width * PW, (e.clientY - r.top) / r.height * PH, e.pointerType === 'pen' ? (e.pressure || 0.5) : 0.5]; };
   c.addEventListener('pointerdown', e => {
     const i = +c.dataset.i;
     if (e.pointerType === 'pen' && !ed.penSeen) { ed.penSeen = true; updEdStatus(); }
+    if (ed.tool === 'move') {
+      if (moving) return;
+      const p = pt(e), im = (ed.sel && ed.sel.page === i && hitImg(i, p) === ed.sel.img) ? ed.sel.img : hitImg(i, p);
+      if (!im) { if (e.pointerType === 'touch') { scroll = {id:e.pointerId, y:e.clientY, top:$('#dePages').scrollTop}; cap(e.pointerId); } if (ed.sel) { ed.sel = null; updImgBar(); redrawEd(); } return; }
+      e.preventDefault(); cap(e.pointerId);
+      ed.sel = {page:i, img:im}; updImgBar();
+      const resize = p[0] > im.x + im.w - 60 && p[1] > im.y + im.h - 60;
+      moving = {id:e.pointerId, page:i, img:im, resize, start:p, from:{x:im.x, y:im.y, w:im.w, h:im.h}};
+      drawEdPage(i); return;
+    }
     if (e.pointerType === 'touch' && ed.penSeen) { scroll = {id:e.pointerId, y:e.clientY, top:$('#dePages').scrollTop}; cap(e.pointerId); return; }
     if (drawing || erasing) return;
     e.preventDefault(); cap(e.pointerId);
@@ -3020,6 +3190,12 @@ function bindEdCanvas(c){
   });
   c.addEventListener('pointermove', e => {
     if (scroll && e.pointerId === scroll.id) { $('#dePages').scrollTop = scroll.top - (e.clientY - scroll.y); return; }
+    if (moving && e.pointerId === moving.id) {
+      const p = pt(e), im = moving.img, f = moving.from, dx = p[0] - moving.start[0], dy = p[1] - moving.start[1];
+      if (moving.resize) { const w = Math.max(80, Math.min(PW, f.w + dx)); im.w = w; im.h = w * f.h / f.w; }
+      else { im.x = Math.max(-im.w + 60, Math.min(PW - 60, f.x + dx)); im.y = Math.max(-im.h + 60, Math.min(PH - 60, f.y + dy)); }
+      drawEdPage(moving.page); return;
+    }
     if (erasing && e.pointerId === erasing.id) { eraseAt(erasing, pt(e)); return; }
     if (!drawing || e.pointerId !== drawing.id) return;
     const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
@@ -3027,20 +3203,26 @@ function bindEdCanvas(c){
     for (const ev of (evs.length ? evs : [e])) {
       const p = pt(ev), a = drawing.s.p[drawing.s.p.length - 1];
       if (Math.hypot(p[0] - a[0], p[1] - a[1]) < 1.2) continue;
+      p[0] = Math.round(p[0] * 10) / 10; p[1] = Math.round(p[1] * 10) / 10; p[2] = Math.round(p[2] * 100) / 100;
       drawing.s.p.push(p);
       drawStroke(g, {c:drawing.s.c, w:drawing.s.w, p:[a, p]});
     }
   });
   const end = e => {
     if (scroll && e.pointerId === scroll.id) { scroll = null; return; }
+    if (moving && e.pointerId === moving.id) {
+      const im = moving.img, f = moving.from;
+      if (im.x !== f.x || im.y !== f.y || im.w !== f.w) pushOp({type:'img-move', page:moving.page, img:im, from:f, to:{x:im.x, y:im.y, w:im.w, h:im.h}});
+      moving = null; return;
+    }
     if (erasing && e.pointerId === erasing.id) {
-      if (erasing.items.length) { ed.undo.push({type:'erase', page:erasing.page, items:erasing.items}); ed.redo = []; updUndo(); saveDraft(); }
+      if (erasing.items.length) pushOp({type:'erase', page:erasing.page, items:erasing.items});
       erasing = null; return;
     }
     if (!drawing || e.pointerId !== drawing.id) return;
     ed.pages[drawing.page].push(drawing.s);
-    ed.undo.push({type:'add', page:drawing.page, strokes:[drawing.s]}); ed.redo = []; updUndo();
-    drawing = null; saveDraft();
+    pushOp({type:'add', page:drawing.page, strokes:[drawing.s]});
+    drawing = null;
   };
   c.addEventListener('pointerup', end); c.addEventListener('pointercancel', end);
 }
@@ -3052,54 +3234,110 @@ function eraseAt(st, p){
   if (hit) drawEdPage(st.page);
 }
 function placeStamp(i, p){
-  const [x, y] = p, P = (a, b) => [a, b, 0.55];
+  const [x, y] = p, P = (a, b) => [Math.round(a), Math.round(b), 0.55];
   const strokes = [
     {c:ed.color, w:ed.size, p:[P(x, y - 22), P(x + 44, y - 22), P(x + 44, y + 22), P(x, y + 22), P(x, y - 22)]},
     {c:ed.color, w:ed.size, p:[P(x + 62, y), P(x + 108, y)]},
     {c:ed.color, w:ed.size, p:[P(x + 94, y - 11), P(x + 110, y), P(x + 94, y + 11)]}
   ];
   ed.pages[i].push(...strokes);
-  ed.undo.push({type:'add', page:i, strokes}); ed.redo = []; updUndo(); drawEdPage(i); saveDraft();
+  pushOp({type:'add', page:i, strokes}); drawEdPage(i);
   setEdTool('pen');
 }
-function undoOp(op, rev){
-  const list = ed.pages[op.page];
-  if ((op.type === 'add') !== rev) op.strokes.forEach(s => { const j = list.indexOf(s); if (j >= 0) list.splice(j, 1); });
-  else if (op.type === 'add') list.push(...op.strokes);
-  else if (!rev) op.items.slice().sort((a, b) => a.idx - b.idx).forEach(it => list.splice(Math.min(it.idx, list.length), 0, it.s));
-  else op.items.forEach(it => { const j = list.indexOf(it.s); if (j >= 0) list.splice(j, 1); });
-  drawEdPage(op.page); saveDraft();
+function applyOp(op, forward){
+  const list = ed.pages[op.page], imgs = ed.imgs[op.page];
+  const rm = (arr, x) => { const j = arr.indexOf(x); if (j >= 0) arr.splice(j, 1); };
+  if (op.type === 'add') { if (forward) list.push(...op.strokes); else op.strokes.forEach(s => rm(list, s)); }
+  else if (op.type === 'erase') { if (forward) op.items.forEach(it => rm(list, it.s)); else op.items.slice().sort((a, b) => a.idx - b.idx).forEach(it => list.splice(Math.min(it.idx, list.length), 0, it.s)); }
+  else if (op.type === 'img-add') { if (forward) imgs.push(op.img); else rm(imgs, op.img); }
+  else if (op.type === 'img-del') { if (forward) rm(imgs, op.img); else imgs.splice(Math.min(op.idx, imgs.length), 0, op.img); }
+  else if (op.type === 'img-move') Object.assign(op.img, forward ? op.to : op.from);
+  if (ed.sel && !imgs.includes(ed.sel.img)) ed.sel = null;
+  updImgBar(); drawEdPage(op.page); saveDraft();
 }
-function setEdTool(t){ ed.tool = t; $$('#deTools [data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === t)); }
-function renderEdPage(i, w){ const c = document.createElement('canvas'), k = w / PW; c.width = w; c.height = Math.round(PH * k); drawEdPage(i, c, k); return c; }
-const docNameCount = {};
-async function saveDoc(){
-  if (!ed.pages.some(p => p.length)) { note('La page est vide. Écris quelque chose avant d’enregistrer.', 3000); return; }
-  while (ed.pages.length > 1 && !ed.pages[ed.pages.length - 1].length) { ed.pages.pop(); ed.canvases.pop(); }
-  const btn = $('#deSave'); btn.disabled = true; btn.lastChild.textContent = 'PDF…';
+function setEdTool(t){ ed.tool = t; $$('#deTools [data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === t)); if (t !== 'move' && ed.sel) { ed.sel = null; updImgBar(); redrawEd(); } }
+function visiblePage(){
+  const box = $('#dePages').getBoundingClientRect(); let best = 0, bd = Infinity;
+  ed.canvases.forEach((c, i) => { const r = c.getBoundingClientRect(); const mid = (Math.max(r.top, box.top) + Math.min(r.bottom, box.bottom)) / 2; const d = r.bottom < box.top || r.top > box.bottom ? Infinity : Math.abs(mid - (box.top + box.height / 3)); if (d < bd) { bd = d; best = i; } });
+  const r = ed.canvases[best].getBoundingClientRect(), cy = ((box.top + box.bottom) / 2 - r.top) / r.height * PH;
+  return {page:best, cy};
+}
+async function imageToData(blob){
+  let bmp;
+  try { bmp = await createImageBitmap(blob, {imageOrientation:'from-image'}); }
+  catch (e) { bmp = await new Promise((res, rej) => { const u = URL.createObjectURL(blob), i = new Image(); i.onload = () => { URL.revokeObjectURL(u); res(i); }; i.onerror = () => { URL.revokeObjectURL(u); rej(new Error('image illisible')); }; i.src = u; }); }
+  const k = Math.min(1, 1400 / Math.max(bmp.width, bmp.height));
+  const c = document.createElement('canvas'); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+  c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height); bmp.close?.();
+  return {src:c.toDataURL('image/jpeg', .82), w:c.width, h:c.height};
+}
+async function insertPhoto(blob){
+  closeSheet($('#sheetDocPhoto'));
+  note('Insertion de la photo…', 6000);
   try {
-    const n = ed.pages.length, o = edDocObj(), site = o.site, kind = ed.doc.kind;
-    ed.doc.title = $('#deTitle').value.trim() || docTitle(kind);
-    const pdf = await makePdf(ed.pages.map((_, i) => renderEdPage(i, 1240)), ed.doc.title);
-    const previews = ed.pages.map((_, i) => renderEdPage(i, 760).toDataURL('image/jpeg', .85));
-    const thumb = renderEdPage(0, 300).toDataURL('image/jpeg', .8);
-    let base = `${ed.doc.date}_${DOCS[kind].file}_${slug(site ? site.name : 'A-classer')}`;
-    docNameCount[base] = (docNameCount[base] || 0) + 1;
-    const name = base + (docNameCount[base] > 1 ? '_' + docNameCount[base] : '') + '.pdf';
-    const path = [siteFolder(site), 'Documents', DOCS[kind].folder];
-    const description = [`Chantier : ${siteLabel(site)}`, `Document : ${DOCS[kind].name}`, `Titre : ${ed.doc.title}`, `Date : ${fmtISO(ed.doc.date)}`, `Pages : ${n}`, 'Créé avec PhotoChantier (écriture manuscrite)'].join('\n');
-    await DB.put({id:'d' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), blob:pdf, created:Date.now(), thumb, previews,
-      meta:{kind:'doc', mime:'application/pdf', name, path, description, siteId:site ? site.id : 'none', taken:new Date(ed.doc.date + 'T12:00:00').toISOString(), dtype:kind, title:ed.doc.title, pages:n, tags:[]}, error:''});
-    try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
-    clearTimeout(draftT);
+    const d = await imageToData(blob), v = visiblePage();
+    let w = 560, h = w * d.h / d.w; if (h > 700) { h = 700; w = h * d.w / d.h; }
+    const y = Math.max(200, Math.min(PH - h - 60, v.cy - h / 2));
+    const img = {id:'p' + newUid(), src:d.src, x:Math.round((PW - w) / 2), y:Math.round(y), w:Math.round(w), h:Math.round(h)};
+    ed.imgs[v.page].push(img);
+    pushOp({type:'img-add', page:v.page, img});
+    setEdTool('move'); ed.sel = {page:v.page, img}; updImgBar(); drawEdPage(v.page);
+    note('Photo ajoutée · déplace-la ou agrandis-la (coin jaune)', 3200);
+  } catch (e) { note('Photo impossible à insérer : ' + e.message, 4000); }
+}
+let dpItems = [];
+async function openPhotoSheet(){
+  const sid = ed.doc.siteId === 'none' ? 'none' : ed.doc.siteId, s = siteById(sid);
+  $('#dpSub').textContent = 'Photos du chantier ' + siteLabel(s);
+  $('#dpGrid').innerHTML = '<p class="hint">Chargement…</p>';
+  openSheet('#sheetDocPhoto');
+  const local = (await DB.all()).filter(it => it.meta.kind !== 'doc' && (it.meta.siteId || 'none') === sid).map(it => ({key:'l' + it.id, blob:it.blob, thumb:it.thumb, time:it.created}));
+  let drive = [];
+  if (DEMO && !tokenValid()) drive = (await demoItems()).filter(i => i.siteId === sid || sid === 'none').slice(0, 12).map(i => ({key:'x' + i.key, url:i.url, thumb:i.thumb || i.url, time:+i.time}));
+  else if (tokenValid() && navigator.onLine) {
+    try {
+      const q = `trashed=false and mimeType='image/jpeg' and appProperties has { key='pc' and value='1' } and appProperties has { key='site' and value='${qEsc(sid)}' }`;
+      const r = await api('https://www.googleapis.com/drive/v3/files?' + new URLSearchParams({q, orderBy:'createdTime desc', pageSize:'40', fields:'files(id,thumbnailLink,createdTime)'}));
+      drive = (r.files || []).map(f => ({key:'d' + f.id, id:f.id, thumb:f.thumbnailLink ? f.thumbnailLink.replace(/=s\d+$/, '=s300') : '', time:Date.parse(f.createdTime)}));
+    } catch (e) {}
+  }
+  dpItems = local.concat(drive);
+  $('#dpGrid').innerHTML = dpItems.length ? dpItems.map(p => {
+    const u = p.blob ? URL.createObjectURL(p.blob) : p.thumb;
+    return `<button class="dp-tile" data-dp="${esc(p.key)}" aria-label="Insérer cette photo">${u ? `<img alt="" loading="lazy" src="${esc(u)}">` : ''}</button>`;
+  }).join('') : '<p class="hint">Aucune photo de ce chantier sur cet appareil ou le Drive.</p>';
+}
+async function pickSitePhoto(key){
+  const p = dpItems.find(x => x.key === key); if (!p) return;
+  try {
+    const blob = p.blob || (p.url ? await (await fetch(p.url)).blob() : await driveBlob(p.id));
+    insertPhoto(blob);
+  } catch (e) { note('Photo indisponible : ' + e.message, 3500); }
+}
+async function saveDoc(){
+  if (!ed.pages.some((p, i) => p.length || (ed.imgs[i] || []).length)) { note('Le document est vide. Écris ou ajoute une photo avant d’enregistrer.', 3000); return; }
+  while (ed.pages.length > 1 && !ed.pages[ed.pages.length - 1].length && !ed.imgs[ed.imgs.length - 1].length) { ed.pages.pop(); ed.imgs.pop(); ed.canvases.pop(); }
+  const btn = $('#deSave'); btn.disabled = true;
+  try {
+    ed.doc.title = $('#deTitle').value.trim() || docTitle(ed.doc.kind);
+    ed.sel = null;
+    const doc = {v:1, ...edDoc(), modified:new Date().toISOString()};
+    const old = await DOCSTORE.get(ed.uid);
+    const rec = {...(old || {}), uid:ed.uid, doc, dirty:true, saved:Date.now(), demo:old ? old.demo : false};
+    rec.thumb = await docThumb(doc);
+    await DOCSTORE.put(rec);
+    if (!rec.demo || tokenValid()) await enqueueDoc(rec);
+    clearTimeout(draftT); await dropDraft(); ed.dirty = false;
     $('#docEditor').hidden = true;
-    desk.site = site ? site.id : '__none';
-    if (!$('#desk').hidden) { renderDeskSites(); }
+    desk.site = doc.siteId === 'none' ? '__none' : doc.siteId;
+    if (docCur && docCur.rec && docCur.rec.uid === rec.uid) closeDocView();
+    if (!$('#desk').hidden) renderDeskSites();
     await refreshQueue(); processQueue();
     if (!$('#desk').hidden) loadDocs();
-    note(`PDF enregistré → ${path.join(' / ')}`, 3800);
+    const s = siteById(doc.siteId);
+    note(`Enregistré → ${siteFolder(s)} / Documents / ${DOCS[doc.kind].folder}`, 3600);
   } catch (e) { note('Enregistrement impossible : ' + e.message, 4500); }
-  finally { btn.disabled = false; btn.lastChild.textContent = 'Enregistrer'; }
+  finally { btn.disabled = false; }
 }
 
 /* ---------- Réglages de mise en page (Paramètres et fiche chantier) ---------- */
@@ -3173,24 +3411,30 @@ function bindDocs(){
   $('#kindList').addEventListener('click', e => { const b = e.target.closest('[data-kind]'); if (!b) return; closeSheet($('#sheetKind')); openEditor(b.dataset.kind, desk.site); });
   /* visionneuse */
   $('#dvClose').addEventListener('click', closeDocView);
-  $('#dvShare').addEventListener('click', () => docCur && shareDoc(docCur));
-  $('#dvDelete').addEventListener('click', () => docCur && askDeleteDoc(docCur));
+  $('#dvEdit').addEventListener('click', async () => { if (!docCur) return; try { const rec = docCur.rec || await getDocRec(docCur.it); if (rec) openEditor(null, null, rec); } catch (e) { note('Ouverture impossible : ' + e.message, 4000); } });
+  $('#dvShare').addEventListener('click', () => docCur && shareDocItem(docCur.it));
+  $('#dvDelete').addEventListener('click', () => docCur && askDeleteDoc(docCur.it));
   /* éditeur */
   $('#deClose').addEventListener('click', closeEditor);
   $('#deSave').addEventListener('click', saveDoc);
-  $('#deUndo').addEventListener('click', () => { const op = ed.undo.pop(); if (!op) return; undoOp(op, false); ed.redo.push(op); updUndo(); });
-  $('#deRedo').addEventListener('click', () => { const op = ed.redo.pop(); if (!op) return; undoOp(op, true); ed.undo.push(op); updUndo(); });
+  $('#deUndo').addEventListener('click', () => { const op = ed.undo.pop(); if (!op) return; applyOp(op, false); ed.redo.push(op); updUndo(); });
+  $('#deRedo').addEventListener('click', () => { const op = ed.redo.pop(); if (!op) return; applyOp(op, true); ed.undo.push(op); updUndo(); });
   $('#deTools').addEventListener('click', e => {
     const b = e.target.closest('.de-tool'); if (!b || b.disabled) return;
-    if (b.dataset.tool) { setEdTool(b.dataset.tool); if (b.dataset.tool === 'stamp') note('Touche la page à l’endroit de la case d’action', 2200); }
-    if (b.dataset.color) { ed.color = b.dataset.color; $$('#deTools [data-color]').forEach(x => x.classList.toggle('on', x === b)); if (ed.tool === 'eraser') setEdTool('pen'); }
-    if (b.dataset.size) { ed.size = +b.dataset.size; $$('#deTools [data-size]').forEach(x => x.classList.toggle('on', x === b)); if (ed.tool === 'eraser') setEdTool('pen'); }
+    if (b.id === 'dePhoto') { openPhotoSheet(); return; }
+    if (b.dataset.tool) { setEdTool(b.dataset.tool); if (b.dataset.tool === 'stamp') note('Touche la page à l’endroit de la case d’action', 2200); if (b.dataset.tool === 'move') note('Touche une photo pour la déplacer ; coin jaune pour la taille', 2600); }
+    if (b.dataset.color) { ed.color = b.dataset.color; $$('#deTools [data-color]').forEach(x => x.classList.toggle('on', x === b)); if (ed.tool !== 'pen') setEdTool('pen'); }
+    if (b.dataset.size) { ed.size = +b.dataset.size; $$('#deTools [data-size]').forEach(x => x.classList.toggle('on', x === b)); if (ed.tool !== 'pen') setEdTool('pen'); }
   });
-  $('#deBg').addEventListener('click', () => { const o = ['lined', 'grid', 'plain'], cur = edDocObj().lay.bg; ed.doc.bg = o[(o.indexOf(cur) + 1) % 3]; $('#deBgT').textContent = BGN[ed.doc.bg]; redrawEd(); saveDraft(); });
-  $('#deAddPage').addEventListener('click', () => { ed.pages.push([]); addEdCanvas(ed.pages.length - 1); resizeEdPages(); ed.canvases[ed.canvases.length - 1].scrollIntoView({behavior:'smooth', block:'start'}); saveDraft(); });
+  $('#deImgDel').addEventListener('click', () => { if (!ed.sel) return; const {page, img} = ed.sel, imgs = ed.imgs[page], idx = imgs.indexOf(img); if (idx < 0) return; imgs.splice(idx, 1); ed.sel = null; pushOp({type:'img-del', page, img, idx}); updImgBar(); drawEdPage(page); });
+  $('#deImgDone').addEventListener('click', () => setEdTool('pen'));
+  $('#dpFile').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) insertPhoto(f); });
+  $('#dpGrid').addEventListener('click', e => { const b = e.target.closest('[data-dp]'); if (b) pickSitePhoto(b.dataset.dp); });
+  $('#deBg').addEventListener('click', () => { const o = ['lined', 'grid', 'plain'], cur = layOfDoc(ed.doc).lay.bg; ed.doc.bg = o[(o.indexOf(cur) + 1) % 3]; $('#deBgT').textContent = BGN[ed.doc.bg]; redrawEd(); saveDraft(); });
+  $('#deAddPage').addEventListener('click', () => { ed.pages.push([]); ed.imgs.push([]); addEdCanvas(ed.pages.length - 1); resizeEdPages(); ed.canvases[ed.canvases.length - 1].scrollIntoView({behavior:'smooth', block:'start'}); saveDraft(); });
   $('#deSite').addEventListener('change', () => { ed.doc.siteId = $('#deSite').value; redrawEd(); saveDraft(); });
   $('#deDate').addEventListener('change', () => { ed.doc.date = $('#deDate').value || todayISO(); redrawEd(); saveDraft(); });
-  $('#deKind').addEventListener('change', () => { const t = $('#deKind').value, old = ed.doc.kind; if ($('#deTitle').value.trim() === docTitle(old)) { ed.doc.title = docTitle(t); $('#deTitle').value = ed.doc.title; } ed.doc.kind = t; ed.doc.bg = null; $('#deBgT').textContent = BGN[edDocObj().lay.bg]; redrawEd(); saveDraft(); note('Modèle : ' + DOCS[t].name + ' · ton écriture est gardée', 2600); });
+  $('#deKind').addEventListener('change', () => { const t = $('#deKind').value, old = ed.doc.kind; if ($('#deTitle').value.trim() === docTitle(old)) { ed.doc.title = docTitle(t); $('#deTitle').value = ed.doc.title; } ed.doc.kind = t; ed.doc.bg = null; $('#deBgT').textContent = BGN[layOfDoc(ed.doc).lay.bg]; redrawEd(); saveDraft(); note('Modèle : ' + DOCS[t].name + ' · ton écriture est gardée', 2600); });
   $('#deTitle').addEventListener('input', () => { ed.doc.title = $('#deTitle').value; redrawEd(); saveDraft(); });
   addEventListener('resize', () => { resizeEdPages(); });
 }
@@ -3268,7 +3512,7 @@ function bind(){
     const v = e.target.closest('[data-qview]'), sh = e.target.closest('[data-qshare]');
     if (v || sh) {
       const it = (await DB.all()).find(x => x.id === (v || sh).dataset[v ? 'qview' : 'qshare']); if (!it) return;
-      if (it.meta.kind === 'doc') { const d = docLocalItem(it); if (v) { closeSheet($('#sheetQueue')); openDocView(d); } else shareDoc(d); return; }
+      if (it.meta.kind === 'doc') { const rec = await DOCSTORE.get(it.meta.uid); if (rec) { if (v) { closeSheet($('#sheetQueue')); openDesk(); openDocView(recItem(rec)); } else shareDocRec(rec); } return; }
       const item = localItem(it);
       if (v) { closeSheet($('#sheetQueue')); openViewer(item); } else openShare([item]);
       return;
