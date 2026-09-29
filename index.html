@@ -249,9 +249,17 @@ input:focus,select:focus{outline:2px solid var(--signal);outline-offset:0;border
 .msg.ok{color:var(--ok)}
 
 .viewer{position:fixed;inset:0;z-index:45;background:#000;display:grid;grid-template-rows:1fr auto}
-.viewer-img{min-height:0;display:grid;place-items:center}
-.viewer img{max-width:100%;max-height:100%;object-fit:contain}
-.viewer>.icon-btn{position:absolute;top:calc(var(--st) + 12px);right:calc(var(--sr) + 12px)}
+.viewer-img{min-height:0;display:grid;place-items:center;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+.viewer img{max-width:100%;max-height:100%;object-fit:contain;will-change:transform;-webkit-user-drag:none;pointer-events:none}
+.viewer-img.anim img{transition:transform .2s ease-out,opacity .2s ease-out}
+.vnav{position:absolute;top:calc(50% - 60px);width:52px;height:52px;border-radius:26px}
+.vnav.prev{left:calc(var(--sl) + 12px)}.vnav.next{right:calc(var(--sr) + 12px)}
+.vnav:disabled{opacity:.25}
+.vcount{position:absolute;top:calc(var(--st) + 18px);left:calc(var(--sl) + 14px);padding:6px 12px;border-radius:16px;font:600 14px var(--mono)}
+.viewer.chrome-off .viewer-bar,.viewer.chrome-off .vnav,.viewer.chrome-off .vcount,.viewer.chrome-off>#viewerClose{opacity:0;pointer-events:none}
+.viewer-bar,.vnav,.vcount,#viewerClose{transition:opacity .2s}
+@media (pointer:coarse){.vnav{display:none}}
+#viewerClose{position:absolute;top:calc(var(--st) + 12px);right:calc(var(--sr) + 12px)}
 .viewer-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px calc(var(--sr) + 14px) calc(var(--sb) + 14px) calc(var(--sl) + 14px);background:rgba(19,21,24,.96);border-top:1px solid var(--line)}
 .viewer-bar .vt{flex:1 1 200px;min-width:0}
 .viewer-bar .vt b{display:block;font:500 13px/1.35 var(--mono);overflow-wrap:anywhere}
@@ -305,6 +313,48 @@ input:focus,select:focus{outline:2px solid var(--signal);outline-offset:0;border
 .imp-label{margin:0;font:700 12.5px/1 var(--body);text-transform:uppercase;letter-spacing:.12em;color:var(--signal)}
 .inbox-badge{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;border-radius:10px;padding:0 5px;background:var(--signal);color:var(--signal-ink);font:700 12px/20px var(--body)}
 #galImport{position:relative}
+.lay-box{display:grid;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface2)}
+.lay-box .seg span{padding:9px 6px;font-size:13px}
+.lay-box .chips .chip{min-height:38px;padding:0 12px;font-size:14px}
+#seLayPreview{width:100%;height:auto;border-radius:10px;border:1px solid var(--line);display:block;background:#222}
+.rot-ic{transition:transform .25s ease}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+#gallery{display:flex;flex-direction:column}
+#gallery[hidden]{display:none!important}
+.gal-filters{flex:none;width:100%;max-width:720px;margin:0 auto;padding:10px calc(var(--sr) + 16px) 0 calc(var(--sl) + 16px);display:grid;gap:8px}
+.gf-row{display:flex;gap:8px;align-items:center;min-width:0}
+.vtabs{display:flex;flex:none;padding:3px;gap:3px;border-radius:11px;background:var(--surface2);border:1px solid var(--line)}
+.vtabs button{display:flex;align-items:center;gap:6px;border:0;background:none;border-radius:8px;min-height:38px;padding:0 12px;color:var(--muted);font:700 16px/1 var(--display);text-transform:uppercase;letter-spacing:.03em}
+.vtabs button .ic{width:18px;height:18px}
+@media (max-width:460px){.vtabs button .ic{display:none}.vtabs button{padding:0 11px}}
+.vtabs button.on{background:var(--signal);color:var(--signal-ink)}
+#galRange{flex:1;min-width:0;width:auto;min-height:44px}
+input[type=date]{min-height:42px;padding:6px 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface2);color:var(--text);font:15px var(--body);width:100%}
+#galCustom label{flex:1;display:grid;gap:3px;font-size:12.5px;color:var(--muted)}
+#galFilters .gal-sites{padding:2px 0 6px}
+.map-wrap{position:relative;flex:1;min-height:0}
+#map{position:absolute;inset:0;background:#2a2e33}
+/* Leaflet 1.9.4 (BSD-2) */
+ .leaflet-pane,.leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-tile-container,.leaflet-pane>svg,.leaflet-pane>canvas,.leaflet-zoom-box,.leaflet-image-layer,.leaflet-layer{position:absolute;left:0;top:0;}.leaflet-container{overflow:hidden;}.leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-user-drag:none;}.leaflet-tile::selection{background:transparent;}.leaflet-safari .leaflet-tile{image-rendering:-webkit-optimize-contrast;}.leaflet-safari .leaflet-tile-container{width:1600px;height:1600px;-webkit-transform-origin:0 0;}.leaflet-marker-icon,.leaflet-marker-shadow{display:block;}.leaflet-container .leaflet-overlay-pane svg{max-width:none !important;max-height:none !important;}.leaflet-container .leaflet-marker-pane img,.leaflet-container .leaflet-shadow-pane img,.leaflet-container .leaflet-tile-pane img,.leaflet-container img.leaflet-image-layer,.leaflet-container .leaflet-tile{max-width:none !important;max-height:none !important;width:auto;padding:0;}.leaflet-container img.leaflet-tile{mix-blend-mode:plus-lighter;}.leaflet-container.leaflet-touch-zoom{-ms-touch-action:pan-x pan-y;touch-action:pan-x pan-y;}.leaflet-container.leaflet-touch-drag{-ms-touch-action:pinch-zoom;touch-action:none;touch-action:pinch-zoom;}.leaflet-container.leaflet-touch-drag.leaflet-touch-zoom{-ms-touch-action:none;touch-action:none;}.leaflet-container{-webkit-tap-highlight-color:transparent;}.leaflet-container a{-webkit-tap-highlight-color:rgba(51,181,229,0.4);}.leaflet-tile{filter:inherit;visibility:hidden;}.leaflet-tile-loaded{visibility:inherit;}.leaflet-zoom-box{width:0;height:0;-moz-box-sizing:border-box;box-sizing:border-box;z-index:800;}.leaflet-overlay-pane svg{-moz-user-select:none;}.leaflet-pane{z-index:400;}.leaflet-tile-pane{z-index:200;}.leaflet-overlay-pane{z-index:400;}.leaflet-shadow-pane{z-index:500;}.leaflet-marker-pane{z-index:600;}.leaflet-tooltip-pane{z-index:650;}.leaflet-popup-pane{z-index:700;}.leaflet-map-pane canvas{z-index:100;}.leaflet-map-pane svg{z-index:200;}.leaflet-vml-shape{width:1px;height:1px;}.lvml{display:inline-block;position:absolute;}.leaflet-control{position:relative;z-index:800;pointer-events:visiblePainted;pointer-events:auto;}.leaflet-top,.leaflet-bottom{position:absolute;z-index:1000;pointer-events:none;}.leaflet-top{top:0;}.leaflet-right{right:0;}.leaflet-bottom{bottom:0;}.leaflet-left{left:0;}.leaflet-control{float:left;clear:both;}.leaflet-right .leaflet-control{float:right;}.leaflet-top .leaflet-control{margin-top:10px;}.leaflet-bottom .leaflet-control{margin-bottom:10px;}.leaflet-left .leaflet-control{margin-left:10px;}.leaflet-right .leaflet-control{margin-right:10px;}.leaflet-fade-anim .leaflet-popup{opacity:0;-webkit-transition:opacity 0.2s linear;-moz-transition:opacity 0.2s linear;transition:opacity 0.2s linear;}.leaflet-fade-anim .leaflet-map-pane .leaflet-popup{opacity:1;}.leaflet-zoom-animated{-webkit-transform-origin:0 0;-ms-transform-origin:0 0;transform-origin:0 0;}svg.leaflet-zoom-animated{will-change:transform;}.leaflet-zoom-anim .leaflet-zoom-animated{-webkit-transition:-webkit-transform 0.25s cubic-bezier(0,0,0.25,1);-moz-transition:-moz-transform 0.25s cubic-bezier(0,0,0.25,1);transition:transform 0.25s cubic-bezier(0,0,0.25,1);}.leaflet-zoom-anim .leaflet-tile,.leaflet-pan-anim .leaflet-tile{-webkit-transition:none;-moz-transition:none;transition:none;}.leaflet-zoom-anim .leaflet-zoom-hide{visibility:hidden;}.leaflet-interactive{cursor:pointer;}.leaflet-grab{cursor:-webkit-grab;cursor:-moz-grab;cursor:grab;}.leaflet-crosshair,.leaflet-crosshair .leaflet-interactive{cursor:crosshair;}.leaflet-popup-pane,.leaflet-control{cursor:auto;}.leaflet-dragging .leaflet-grab,.leaflet-dragging .leaflet-grab .leaflet-interactive,.leaflet-dragging .leaflet-marker-draggable{cursor:move;cursor:-webkit-grabbing;cursor:-moz-grabbing;cursor:grabbing;}.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-image-layer,.leaflet-pane>svg path,.leaflet-tile-container{pointer-events:none;}.leaflet-marker-icon.leaflet-interactive,.leaflet-image-layer.leaflet-interactive,.leaflet-pane>svg path.leaflet-interactive,svg.leaflet-image-layer.leaflet-interactive path{pointer-events:visiblePainted;pointer-events:auto;}.leaflet-container{background:#ddd;outline-offset:1px;}.leaflet-container a{color:#0078A8;}.leaflet-zoom-box{border:2px dotted #38f;background:rgba(255,255,255,0.5);}.leaflet-container{font-family:"Helvetica Neue",Arial,Helvetica,sans-serif;font-size:12px;font-size:0.75rem;line-height:1.5;}.leaflet-bar{box-shadow:0 1px 5px rgba(0,0,0,0.65);border-radius:4px;}.leaflet-bar a{background-color:#fff;border-bottom:1px solid #ccc;width:26px;height:26px;line-height:26px;display:block;text-align:center;text-decoration:none;color:black;}.leaflet-bar a,.leaflet-control-layers-toggle{background-position:50% 50%;background-repeat:no-repeat;display:block;}.leaflet-bar a:hover,.leaflet-bar a:focus{background-color:#f4f4f4;}.leaflet-bar a:first-child{border-top-left-radius:4px;border-top-right-radius:4px;}.leaflet-bar a:last-child{border-bottom-left-radius:4px;border-bottom-right-radius:4px;border-bottom:none;}.leaflet-bar a.leaflet-disabled{cursor:default;background-color:#f4f4f4;color:#bbb;}.leaflet-touch .leaflet-bar a{width:30px;height:30px;line-height:30px;}.leaflet-touch .leaflet-bar a:first-child{border-top-left-radius:2px;border-top-right-radius:2px;}.leaflet-touch .leaflet-bar a:last-child{border-bottom-left-radius:2px;border-bottom-right-radius:2px;}.leaflet-control-zoom-in,.leaflet-control-zoom-out{font:bold 18px 'Lucida Console',Monaco,monospace;text-indent:1px;}.leaflet-touch .leaflet-control-zoom-in,.leaflet-touch .leaflet-control-zoom-out{font-size:22px;}.leaflet-control-layers{box-shadow:0 1px 5px rgba(0,0,0,0.4);background:#fff;border-radius:5px;}.leaflet-control-layers-toggle{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23222' stroke-width='1.8' stroke-linejoin='round'%3E%3Cpath d='m12 3 9 5-9 5-9-5z'/%3E%3Cpath d='m3 12 9 5 9-5M3 16l9 5 9-5'/%3E%3C/svg%3E");width:36px;height:36px;}.leaflet-retina .leaflet-control-layers-toggle{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23222' stroke-width='1.8' stroke-linejoin='round'%3E%3Cpath d='m12 3 9 5-9 5-9-5z'/%3E%3Cpath d='m3 12 9 5 9-5M3 16l9 5 9-5'/%3E%3C/svg%3E");background-size:22px 22px;background-position:center;}.leaflet-touch .leaflet-control-layers-toggle{width:44px;height:44px;}.leaflet-control-layers .leaflet-control-layers-list,.leaflet-control-layers-expanded .leaflet-control-layers-toggle{display:none;}.leaflet-control-layers-expanded .leaflet-control-layers-list{display:block;position:relative;}.leaflet-control-layers-expanded{padding:6px 10px 6px 6px;color:#333;background:#fff;}.leaflet-control-layers-scrollbar{overflow-y:scroll;overflow-x:hidden;padding-right:5px;}.leaflet-control-layers-selector{margin-top:2px;position:relative;top:1px;}.leaflet-control-layers label{display:block;font-size:13px;font-size:1.08333em;}.leaflet-control-layers-separator{height:0;border-top:1px solid #ddd;margin:5px -10px 5px -6px;}.leaflet-container .leaflet-control-attribution{background:#fff;background:rgba(255,255,255,0.8);margin:0;}.leaflet-control-attribution,.leaflet-control-scale-line{padding:0 5px;color:#333;line-height:1.4;}.leaflet-control-attribution a{text-decoration:none;}.leaflet-control-attribution a:hover,.leaflet-control-attribution a:focus{text-decoration:underline;}.leaflet-attribution-flag{display:inline !important;vertical-align:baseline !important;width:1em;height:0.6669em;}.leaflet-left .leaflet-control-scale{margin-left:5px;}.leaflet-bottom .leaflet-control-scale{margin-bottom:5px;}.leaflet-control-scale-line{border:2px solid #777;border-top:none;line-height:1.1;padding:2px 5px 1px;white-space:nowrap;-moz-box-sizing:border-box;box-sizing:border-box;background:rgba(255,255,255,0.8);text-shadow:1px 1px #fff;}.leaflet-control-scale-line:not(:first-child){border-top:2px solid #777;border-bottom:none;margin-top:-2px;}.leaflet-control-scale-line:not(:first-child):not(:last-child){border-bottom:2px solid #777;}.leaflet-touch .leaflet-control-attribution,.leaflet-touch .leaflet-control-layers,.leaflet-touch .leaflet-bar{box-shadow:none;}.leaflet-touch .leaflet-control-layers,.leaflet-touch .leaflet-bar{border:2px solid rgba(0,0,0,0.2);background-clip:padding-box;}.leaflet-popup{position:absolute;text-align:center;margin-bottom:20px;}.leaflet-popup-content-wrapper{padding:1px;text-align:left;border-radius:12px;}.leaflet-popup-content{margin:13px 24px 13px 20px;line-height:1.3;font-size:13px;font-size:1.08333em;min-height:1px;}.leaflet-popup-content p{margin:17px 0;margin:1.3em 0;}.leaflet-popup-tip-container{width:40px;height:20px;position:absolute;left:50%;margin-top:-1px;margin-left:-20px;overflow:hidden;pointer-events:none;}.leaflet-popup-tip{width:17px;height:17px;padding:1px;margin:-10px auto 0;pointer-events:auto;-webkit-transform:rotate(45deg);-moz-transform:rotate(45deg);-ms-transform:rotate(45deg);transform:rotate(45deg);}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:white;color:#333;box-shadow:0 3px 14px rgba(0,0,0,0.4);}.leaflet-container a.leaflet-popup-close-button{position:absolute;top:0;right:0;border:none;text-align:center;width:24px;height:24px;font:16px/24px Tahoma,Verdana,sans-serif;color:#757575;text-decoration:none;background:transparent;}.leaflet-container a.leaflet-popup-close-button:hover,.leaflet-container a.leaflet-popup-close-button:focus{color:#585858;}.leaflet-popup-scrolled{overflow:auto;}.leaflet-oldie .leaflet-popup-content-wrapper{-ms-zoom:1;}.leaflet-oldie .leaflet-popup-tip{width:24px;margin:0 auto;-ms-filter:"progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678,M12=0.70710678,M21=-0.70710678,M22=0.70710678)";filter:progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678,M12=0.70710678,M21=-0.70710678,M22=0.70710678);}.leaflet-oldie .leaflet-control-zoom,.leaflet-oldie .leaflet-control-layers,.leaflet-oldie .leaflet-popup-content-wrapper,.leaflet-oldie .leaflet-popup-tip{border:1px solid #999;}.leaflet-div-icon{background:#fff;border:1px solid #666;}.leaflet-tooltip{position:absolute;padding:6px;background-color:#fff;border:1px solid #fff;border-radius:3px;color:#222;white-space:nowrap;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;pointer-events:none;box-shadow:0 1px 3px rgba(0,0,0,0.4);}.leaflet-tooltip.leaflet-interactive{cursor:pointer;pointer-events:auto;}.leaflet-tooltip-top:before,.leaflet-tooltip-bottom:before,.leaflet-tooltip-left:before,.leaflet-tooltip-right:before{position:absolute;pointer-events:none;border:6px solid transparent;background:transparent;content:"";}.leaflet-tooltip-bottom{margin-top:6px;}.leaflet-tooltip-top{margin-top:-6px;}.leaflet-tooltip-bottom:before,.leaflet-tooltip-top:before{left:50%;margin-left:-6px;}.leaflet-tooltip-top:before{bottom:0;margin-bottom:-12px;border-top-color:#fff;}.leaflet-tooltip-bottom:before{top:0;margin-top:-12px;margin-left:-6px;border-bottom-color:#fff;}.leaflet-tooltip-left{margin-left:-6px;}.leaflet-tooltip-right{margin-left:6px;}.leaflet-tooltip-left:before,.leaflet-tooltip-right:before{top:50%;margin-top:-6px;}.leaflet-tooltip-left:before{right:0;margin-right:-12px;border-left-color:#fff;}.leaflet-tooltip-right:before{left:0;margin-left:-12px;border-right-color:#fff;}@media print{.leaflet-control{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+.leaflet-container{font:13px var(--body)}
+.pm-wrap{background:none;border:0}
+.pm{display:block;width:48px;height:48px;border-radius:50%;border:3px solid var(--signal);background:#2a2e33;box-shadow:0 2px 10px rgba(0,0,0,.55);overflow:hidden}
+.pm img{width:100%;height:100%;object-fit:cover;display:block}
+.pm.nothumb{background:var(--signal)}
+.pmc{position:absolute;top:-7px;right:-9px;min-width:22px;height:22px;border-radius:11px;padding:0 6px;background:var(--signal);color:var(--signal-ink);font:700 12px/22px var(--body);text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.45)}
+.site-tip{background:none;border:0}
+.site-lbl{position:absolute;left:0;bottom:4px;transform:translateX(-50%);white-space:nowrap;background:rgba(19,21,24,.85);color:var(--signal);border-radius:6px;font:700 12px/1.2 var(--body);padding:3px 7px;pointer-events:none}
+.map-loc{width:34px;height:34px;background:#fff;border:2px solid rgba(0,0,0,.25);border-radius:4px;display:grid;place-items:center;color:#222;cursor:pointer;padding:0}
+.map-loc .ic{width:20px;height:20px}
+.map-info{position:absolute;z-index:500;left:10px;bottom:22px;max-width:calc(100% - 20px);padding:7px 12px;border-radius:10px;font-size:13px;color:var(--text)}
+.map-strip{position:absolute;z-index:600;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);border-radius:16px 16px 0 0;padding:10px 12px calc(var(--sb) + 12px);display:grid;gap:8px;box-shadow:0 -8px 24px rgba(0,0,0,.4)}
+.ms-head{display:flex;align-items:center;gap:10px}
+.ms-head b{flex:1;min-width:0;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ms-head .icon-btn{width:38px;height:38px;background:var(--surface2);border:1px solid var(--line)}
+.ms-list{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.ms-list button{flex:none;width:96px;height:96px;padding:0;border:0;border-radius:8px;overflow:hidden;background:#2a2e33;position:relative}
+.ms-list img{width:100%;height:100%;object-fit:cover;display:block}
+.ms-list small{position:absolute;left:0;right:0;bottom:0;padding:2px 4px;background:rgba(0,0,0,.6);color:#fff;font:500 10.5px/1.3 var(--mono);text-align:left}
 
 /* paysage téléphone : commandes à droite */
 @media (orientation:landscape) and (max-height:560px){
@@ -375,14 +425,14 @@ input:focus,select:focus{outline:2px solid var(--signal);outline-offset:0;border
 
     <footer class="controls">
       <button id="btnQueue" class="thumb-btn" aria-label="Photos du chantier">
-        <img id="lastThumb" alt="" hidden>
-        <svg class="ic" id="queueIcon" viewBox="0 0 24 24"><path d="M7 18a5 5 0 0 1-.9-9.9A6 6 0 0 1 17.7 9 4.5 4.5 0 0 1 17 18"/><path d="M12 12v8M9 15l3-3 3 3"/></svg>
+        <img id="lastThumb" class="rot-ic" alt="" hidden>
+        <svg class="ic rot-ic" id="queueIcon" viewBox="0 0 24 24"><path d="M7 18a5 5 0 0 1-.9-9.9A6 6 0 0 1 17.7 9 4.5 4.5 0 0 1 17 18"/><path d="M12 12v8M9 15l3-3 3 3"/></svg>
         <span id="queueBadge" class="badge" hidden>0</span>
       </button>
       <button id="shutter" class="shutter" aria-label="Prendre une photo"><span></span></button>
       <div class="side-tools">
-        <button id="btnTorch" class="icon-btn glass" aria-label="Lampe" hidden><svg class="ic" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></button>
-        <button id="btnTag" class="icon-btn glass" aria-label="Étiquette pour les prochaines photos"><svg class="ic" viewBox="0 0 24 24"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></button>
+        <button id="btnTorch" class="icon-btn glass" aria-label="Lampe" hidden><svg class="ic rot-ic" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></button>
+        <button id="btnTag" class="icon-btn glass" aria-label="Étiquette pour les prochaines photos"><svg class="ic rot-ic" viewBox="0 0 24 24"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></button>
       </div>
     </footer>
     <div id="flash" class="flash"></div>
@@ -455,6 +505,25 @@ input:focus,select:focus{outline:2px solid var(--signal);outline-offset:0;border
     <label class="field"><span>Rayon de détection</span>
       <select id="seRadius"><option value="100">100 m</option><option value="200">200 m</option><option value="300">300 m</option><option value="500">500 m</option><option value="1000">1 km</option><option value="3000">3 km (tracé routier)</option></select>
     </label>
+    <div class="field"><span>Mise en page des photos de ce chantier</span>
+      <canvas id="seLayPreview" width="720" height="540" aria-label="Aperçu de la mise en page"></canvas>
+      <div class="row"><div class="lbl"><b>Mise en page propre à ce chantier</b><small id="seCustomHint">Sinon : réglage par défaut (Paramètres › Photos)</small></div><label class="switch"><input type="checkbox" id="seCustom"><span></span></label></div>
+      <div id="seLayBox" class="lay-box" hidden>
+        <div class="row"><div class="lbl"><b>Logo de l'entreprise</b><small id="seLogoHint">Sur chaque photo de ce chantier</small></div><label class="switch"><input type="checkbox" id="seLayLogo"><span></span></label></div>
+        <div id="seLogoOpts" style="display:grid;gap:10px">
+          <div class="seg" id="seLayPos">
+            <label><input type="radio" name="seLayPos" value="tl"><span>↖ Haut gauche</span></label>
+            <label><input type="radio" name="seLayPos" value="tr"><span>↗ Haut droite</span></label>
+            <label><input type="radio" name="seLayPos" value="bl"><span>↙ Bas gauche</span></label>
+            <label><input type="radio" name="seLayPos" value="br"><span>↘ Bas droite</span></label>
+          </div>
+          <div class="range-row"><span class="muted" style="font-size:13px">Taille</span><input type="range" id="seLaySize" min="8" max="32" step="1"><output id="seLaySizeOut"></output></div>
+          <div class="row"><div class="lbl"><b>Fond blanc derrière le logo</b><small>Plus lisible sur une photo sombre</small></div><label class="switch"><input type="checkbox" id="seLayBg"><span></span></label></div>
+        </div>
+        <div class="row"><div class="lbl"><b>Bandeau d'informations en bas</b><small>Choisis les informations affichées</small></div><label class="switch"><input type="checkbox" id="seLayBand"><span></span></label></div>
+        <div id="seLayLines" class="chips"></div>
+      </div>
+    </div>
     <p id="seMsg" class="msg" hidden></p>
     <a id="seMap" class="btn ghost" target="_blank" rel="noopener" hidden>Voir sur la carte</a>
   </div>
@@ -473,7 +542,10 @@ input:focus,select:focus{outline:2px solid var(--signal);outline-offset:0;border
 </div>
 
 <div id="viewer" class="viewer" hidden>
-  <div class="viewer-img"><img id="viewerImg" alt="Aperçu de la photo"></div>
+  <div class="viewer-img" id="viewerStage"><img id="viewerImg" alt="Aperçu de la photo"></div>
+  <span id="viewerCount" class="vcount glass" hidden></span>
+  <button id="viewerPrev" class="icon-btn glass vnav prev" aria-label="Photo précédente"><svg class="ic" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg></button>
+  <button id="viewerNext" class="icon-btn glass vnav next" aria-label="Photo suivante"><svg class="ic" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
   <div class="viewer-bar" id="viewerBar">
     <div class="vt"><b id="viewerName"></b><small id="viewerSub"></small></div>
     <div class="btn-row">
@@ -528,9 +600,21 @@ input:focus,select:focus{outline:2px solid var(--signal);outline-offset:0;border
     <button id="galRefresh" class="icon-btn" aria-label="Actualiser"><svg class="ic" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/></svg></button>
     <button id="galSelect" class="btn" style="padding:0 14px">Choisir</button>
   </header>
+  <div class="gal-filters" id="galFilters">
+    <div class="gf-row">
+      <div class="vtabs" role="tablist" aria-label="Affichage"><button id="tabGrid" role="tab" aria-selected="true" class="on"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Photos</button><button id="tabMap" role="tab" aria-selected="false"><svg class="ic" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Carte</button></div>
+      <select id="galRange" aria-label="Période"><option value="all">Toutes dates</option><option value="today">Aujourd'hui</option><option value="7">7 jours</option><option value="30">30 jours</option><option value="custom">Période…</option></select>
+    </div>
+    <div class="gf-row" id="galCustom" hidden><label>Du<input type="date" id="galFrom"></label><label>Au<input type="date" id="galTo"></label></div>
+    <div id="galSites" class="gal-sites"></div>
+  </div>
+  <div class="map-wrap" id="mapWrap" hidden>
+    <div id="map" aria-label="Carte des photos"></div>
+    <div id="mapInfo" class="map-info glass" role="status"></div>
+    <div id="mapStrip" class="map-strip" hidden><div class="ms-head"><b id="msTitle"></b><button id="msClose" class="icon-btn" aria-label="Fermer"><svg class="ic" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div><div id="msList" class="ms-list"></div></div>
+  </div>
   <div class="panel-body" id="galScroll">
     <div class="panel-inner" id="galInner">
-      <div id="galSites" class="gal-sites"></div>
       <div id="galInfo" class="gal-info" hidden><p id="galInfoText"></p><button id="galInfoBtn" class="btn"></button></div>
       <div id="galTags" class="gal-tags"></div>
       <div id="galGrid" class="gal-grid"></div>
@@ -577,8 +661,9 @@ input:focus,select:focus{outline:2px solid var(--signal);outline-offset:0;border
 
       <section class="group" id="g-photos">
         <h2>Photos</h2>
-        <div class="row"><div class="lbl"><b>Horodatage incrusté</b><small>Chantier, date, heure et GPS en bas de l'image</small></div><label class="switch"><input type="checkbox" id="setStamp"><span></span></label></div>
-        <div class="preview-wrap"><canvas id="stampPreview" width="960" height="720" aria-label="Aperçu du rendu sur une photo"></canvas><p class="hint">Aperçu sur une photo d'exemple, avec le logo du premier chantier qui en a un.</p></div>
+        <div class="row"><div class="lbl"><b>Rotation automatique</b><small>La photo suit la tenue du téléphone (portrait ou paysage), même si la rotation de l'écran est bloquée</small></div><label class="switch"><input type="checkbox" id="setRotate"><span></span></label></div>
+        <div class="row"><div class="lbl"><b>Horodatage incrusté (par défaut)</b><small>Chantier, date, heure et GPS en bas de l'image. Chaque chantier peut avoir sa propre mise en page (fiche du chantier).</small></div><label class="switch"><input type="checkbox" id="setStamp"><span></span></label></div>
+        <div class="preview-wrap"><canvas id="stampPreview" width="960" height="720" aria-label="Aperçu du rendu sur une photo"></canvas><p class="hint">Aperçu sur une photo d'exemple, avec le premier chantier qui a un logo et sa mise en page.</p></div>
         <div class="field"><span>Qualité</span>
           <div class="opts">
             <label class="opt"><input type="radio" name="quality" value="standard"><div><b>Standard</b><small>≈ 1 à 2 Mo · recommandé sur chantier</small></div></label>
@@ -626,6 +711,15 @@ input:focus,select:focus{outline:2px solid var(--signal);outline-offset:0;border
           <li>Aussi possible depuis l'app : Galerie → bouton <b>Importer</b> (icône image).</li>
         </ol>
         <p class="hint">Si PhotoChantier n'apparaît pas encore dans le menu Partager après la mise à jour, ouvre l'app deux ou trois fois : Android met l'app installée à jour en général dans les 24 h.</p>
+        <h3>Galerie et carte</h3>
+        <ol>
+          <li>Dans la visionneuse, <b>glisse le doigt</b> à gauche ou à droite pour passer à la photo suivante. Glisse vers le bas pour fermer, touche la photo pour masquer les boutons.</li>
+          <li>Onglet <b>Carte</b> : les photos sont placées à leur position GPS. Touche une pastille pour voir les photos de cet endroit.</li>
+          <li>Filtre par <b>chantier</b> (bandeau des chantiers) et par <b>période</b> (liste des dates). Les filtres valent pour la grille et la carte.</li>
+          <li>Fond de carte : plan ou photo aérienne swisstopo, ou OpenStreetMap (bouton en haut à droite de la carte).</li>
+        </ol>
+        <h3>Mise en page par chantier</h3>
+        <p class="muted">Paramètres › Chantiers › un chantier › « Mise en page propre à ce chantier » : logo oui/non, position, taille, fond blanc, bandeau du bas et informations affichées. Un aperçu montre le résultat.</p>
         <h3>Supprimer des photos</h3>
         <ol>
           <li>Une photo : ouvre-la dans la galerie, puis <b>Supprimer</b>.</li>
@@ -634,7 +728,7 @@ input:focus,select:focus{outline:2px solid var(--signal);outline-offset:0;border
         <p class="hint">Les photos déjà envoyées vont dans la <b>corbeille du Drive</b> : récupérables pendant 30 jours depuis Google Drive. Les photos en attente sont effacées du téléphone.</p>
         <h3>Confidentialité</h3>
         <p class="muted">Les photos ne vont jamais dans la galerie. Sans réseau, elles attendent dans l'espace privé de l'app, invisible des autres applications, et sont effacées dès qu'elles sont arrivées sur le Drive.</p>
-        <p class="hint mono">PhotoChantier · version 0.9</p>
+        <p class="hint mono">PhotoChantier · version 1.0</p>
       </section>
     </div>
   </div>
@@ -657,7 +751,7 @@ const ICON_FOLDER = '<svg class="ic" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1
 const KEY = 'photochantier.v1';
 const DEF = {
   v: 1, logoPos: 'tr', logoSize: 18, logoBg: false, logoLib: [],
-  stamp: true, quality: 'standard', tagPrompt: true, tagDelay: 5, structure: 'A',
+  stamp: true, quality: 'standard', tagPrompt: true, tagDelay: 5, structure: 'A', autoRotate: true, mapLayer: 'Plan CH',
   tags: ['fouille','réseau EU','réseau EC','coffrage','armature','bétonnage','remblayage','enrobé','bordures','défaut','avant','après'],
   sites: [
     {id:'ex1', number:'000001', name:'Exemple Saillon', lat:46.17170, lon:7.18830, radius:300, example:true},
@@ -842,6 +936,34 @@ async function grabFrame(){
   return src;
 }
 
+/* ---------- Orientation du téléphone ---------- */
+let devAngle = 0;
+const scrAngle = () => { const a = (screen.orientation && typeof screen.orientation.angle === 'number') ? screen.orientation.angle : (+window.orientation || 0); return ((a % 360) + 360) % 360; };
+function uiRotation(){ return S.autoRotate ? ((devAngle - scrAngle()) + 360) % 360 : 0; }
+function applyUiRotation(){
+  let r = uiRotation(); if (r === 270) r = -90;
+  $$('.rot-ic').forEach(el => el.style.transform = r ? `rotate(${r}deg)` : '');
+}
+function onMotion(e){
+  const a = e.accelerationIncludingGravity; if (!a || a.x == null || a.y == null) return;
+  const x = a.x, y = a.y; if (Math.hypot(x, y) < 4.5) return;
+  let d;
+  if (Math.abs(y) > Math.abs(x) * 1.35) d = y > 0 ? 0 : 180;
+  else if (Math.abs(x) > Math.abs(y) * 1.35) d = x > 0 ? 90 : 270;
+  else return;
+  if (d !== devAngle) { devAngle = d; applyUiRotation(); }
+}
+window.addEventListener('devicemotion', onMotion);
+screen.orientation?.addEventListener?.('change', applyUiRotation);
+function rotateSrc(src, deg){
+  deg = ((deg % 360) + 360) % 360; if (!deg) return src;
+  const c = document.createElement('canvas'), q = deg % 180 !== 0;
+  c.width = q ? src.height : src.width; c.height = q ? src.width : src.height;
+  const g = c.getContext('2d'); g.translate(c.width / 2, c.height / 2); g.rotate(deg * Math.PI / 180);
+  g.drawImage(src, -src.width / 2, -src.height / 2); src.close?.();
+  return c;
+}
+
 /* ---------- Prise de vue ---------- */
 let activeTag = null;     // {tags:[], note:''}
 let pending = null;       // photo en attente d'étiquette
@@ -868,8 +990,10 @@ async function capture(){
   const f = $('#flash'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
   navigator.vibrate?.(25);
   if (pending) commit(pending);
-  const src = await grabFrame();
+  const rot = uiRotation();
+  let src = await grabFrame();
   if (!src.width) { note('Image vide, réessaie.'); return; }
+  if (rot) src = rotateSrc(src, 360 - rot);
   handleShot(src);
 }
 async function fromFile(file){
@@ -929,7 +1053,7 @@ async function commit(shot){
     const blob = await render(shot.src, shot.info);
     shot.src.close?.(); shot.src = null;
     const name = fileName(shot.info);
-    await DB.put({id:shot.id, blob, created:Date.now(), thumb:shot.thumb, meta:{name, path:pathFor(shot.info), description:describe(shot.info), siteId:shot.info.site ? shot.info.site.id : 'none', taken:shot.info.time.toISOString(), tags:shot.info.tags.slice()}, error:''});
+    await DB.put({id:shot.id, blob, created:Date.now(), thumb:shot.thumb, meta:{name, path:pathFor(shot.info), description:describe(shot.info), siteId:shot.info.site ? shot.info.site.id : 'none', taken:shot.info.time.toISOString(), tags:shot.info.tags.slice(), ...(shot.info.pos ? {lat:shot.info.pos.lat, lon:shot.info.pos.lon} : {})}, error:''});
     await refreshQueue();
     processQueue();
   } catch (e) { note("Erreur d'enregistrement : " + e.message); }
@@ -948,20 +1072,28 @@ function getImg(src){
 }
 const fmtDate = d => pad2(d.getDate()) + '.' + pad2(d.getMonth() + 1) + '.' + d.getFullYear();
 const fmtTime = d => pad2(d.getHours()) + ':' + pad2(d.getMinutes());
-function stampLines(info){
-  const l1 = siteLabel(info.site) + (info.tags.length ? '  ·  ' + info.tags.join(', ') : '');
+const LINES = [['site','Chantier'],['tags','Étiquettes'],['date','Date et heure'],['gps','GPS'],['note','Commentaire']];
+function defLayout(){ return {logo:true, logoPos:S.logoPos || 'tr', logoSize:S.logoSize || 18, logoBg:!!S.logoBg, band:!!S.stamp, lines:{site:true, tags:true, date:true, gps:true, note:true}}; }
+function layoutFor(site){
+  const d = defLayout(), l = site && site.layout;
+  return l ? {...d, ...l, lines:{...d.lines, ...(l.lines || {})}} : d;
+}
+function stampLines(info, lay = layoutFor(info.site)){
+  const L = lay.lines;
   const gps = info.pos ? `${info.pos.lat.toFixed(5)} N  ${info.pos.lon.toFixed(5)} E` + (info.pos.acc != null ? `  ±${Math.round(info.pos.acc)} m` : '') : (info.imported ? 'Photo importée' : 'Position GPS indisponible');
-  const l2 = fmtDate(info.time) + '  ' + fmtTime(info.time) + '  ·  ' + gps;
-  const l3 = info.note || '';
+  const l1 = [L.site ? siteLabel(info.site) : '', L.tags && info.tags.length ? info.tags.join(', ') : ''].filter(Boolean).join('  ·  ');
+  const l2 = [L.date ? fmtDate(info.time) + '  ' + fmtTime(info.time) : '', L.gps ? gps : ''].filter(Boolean).join('  ·  ');
+  const l3 = L.note ? info.note || '' : '';
   return [l1, l2, l3].filter(Boolean);
 }
 function fitText(g, t, w){ if (g.measureText(t).width <= w) return t; while (t.length > 1 && g.measureText(t + '…').width > w) t = t.slice(0, -1); return t + '…'; }
-function decorate(g, W, H, info, logoImg, stamp = S.stamp){
+function decorate(g, W, H, info, logoImg, lay = layoutFor(info.site)){
   const m = Math.min(W, H);
   const fs = Math.max(12, Math.round(m * 0.03));
   let bandTop = H;
-  if (stamp) {
-    const lines = stampLines(info), lh = fs * 1.32, pad = fs * .75;
+  const lines = lay.band ? stampLines(info, lay) : [];
+  if (lines.length) {
+    const lh = fs * 1.32, pad = fs * .75;
     const bh = pad * 2 + lh * lines.length; bandTop = H - bh;
     g.fillStyle = 'rgba(12,13,15,.66)'; g.fillRect(0, bandTop, W, bh);
     g.fillStyle = '#f2c230'; g.fillRect(0, bandTop, W, Math.max(2, Math.round(fs * .14)));
@@ -973,15 +1105,15 @@ function decorate(g, W, H, info, logoImg, stamp = S.stamp){
       g.fillText(fitText(g, ln, W - pad * 2), pad, bandTop + pad + i * lh + (lh - size) / 2);
     });
   }
-  if (logoImg) {
+  if (logoImg && lay.logo) {
     const iw = logoImg.naturalWidth, ih = logoImg.naturalHeight;
-    let lw = m * S.logoSize / 100, lh = lw * ih / iw;
-    if (lh > H * .2) { lh = H * .2; lw = lh * iw / ih; }
-    const mg = fs * .9, p = S.logoBg ? fs * .45 : 0;
-    const left = S.logoPos[1] === 'l', top = S.logoPos[0] === 't';
+    let lw = m * lay.logoSize / 100, lh = lw * ih / iw;
+    if (lh > H * .25) { lh = H * .25; lw = lh * iw / ih; }
+    const mg = fs * .9, p = lay.logoBg ? fs * .45 : 0;
+    const left = lay.logoPos[1] === 'l', top = lay.logoPos[0] === 't';
     const x = left ? mg + p : W - mg - p - lw;
     const y = top ? mg + p : bandTop - mg - p - lh;
-    if (S.logoBg) {
+    if (lay.logoBg) {
       g.fillStyle = 'rgba(255,255,255,.93)';
       if (g.roundRect) { g.beginPath(); g.roundRect(x - p, y - p, lw + 2 * p, lh + 2 * p, fs * .35); g.fill(); } else g.fillRect(x - p, y - p, lw + 2 * p, lh + 2 * p);
     }
@@ -989,15 +1121,13 @@ function decorate(g, W, H, info, logoImg, stamp = S.stamp){
   }
 }
 async function render(src, info, opt = {}){
-  const stamp = opt.stamp ?? S.stamp;
   const q = QUAL[S.quality] || QUAL.standard;
   const k = Math.min(1, q.max / Math.max(src.width, src.height));
   const W = Math.round(src.width * k), H = Math.round(src.height * k);
   const c = document.createElement('canvas'); c.width = W; c.height = H;
   const g = c.getContext('2d'); g.imageSmoothingQuality = 'high';
   g.drawImage(src, 0, 0, W, H);
-  if (opt.stamp === false) decorate(g, W, H, info, null, false);
-  else decorate(g, W, H, info, await getImg(info.site?.logo), stamp);
+  if (opt.stamp !== false) decorate(g, W, H, info, await getImg(info.site?.logo), layoutFor(info.site));
   return await new Promise((res, rej) => c.toBlob(b => b ? res(b) : rej(new Error('encodage JPEG')), 'image/jpeg', q.q));
 }
 const clean = s => String(s).normalize('NFC').replace(/[\/\\:*?"<>|#%]+/g, '').trim();
@@ -1099,7 +1229,7 @@ async function ensurePath(parts){
 }
 async function uploadFile(blob, meta, parent){
   const md = {name:meta.name, parents:[parent], description:meta.description, mimeType:'image/jpeg',
-    appProperties:{pc:'1', site:meta.siteId || 'none', taken:meta.taken || '', tags:(meta.tags || []).join('|').slice(0, 60), ...(meta.imported ? {imp:'1'} : {})}};
+    appProperties:{pc:'1', site:meta.siteId || 'none', taken:meta.taken || '', tags:(meta.tags || []).join('|').slice(0, 60), ...(meta.imported ? {imp:'1'} : {}), ...(meta.lat != null ? {lat:(+meta.lat).toFixed(6), lon:(+meta.lon).toFixed(6)} : {})}};
   const auth = {Authorization:'Bearer ' + S.drive.token};
   if (blob.size < 4.5e6) {
     const b = 'pc' + Math.random().toString(36).slice(2);
@@ -1152,7 +1282,7 @@ async function processQueue(){
         if (e.status >= 500 || e.status === 403 || e.status === 429) break;
       }
     }
-  } finally { busy = false; $('#btnQueue').classList.remove('busy'); await refreshQueue(); if (up && !$('#gallery').hidden && !gal.selMode && !gal.loading) loadGallery(true); }
+  } finally { busy = false; $('#btnQueue').classList.remove('busy'); await refreshQueue(); if (up) refreshView(); }
 }
 function renderBanner(){
   const r = queueReason(), bn = $('#banner');
@@ -1233,7 +1363,7 @@ function openSettings(anchor){
   if (anchor) setTimeout(() => document.getElementById(anchor)?.scrollIntoView({block:'start'}), 30);
 }
 function renderSettings(){
-  $('#setStamp').checked = S.stamp; $('#setTagPrompt').checked = S.tagPrompt;
+  $('#setStamp').checked = S.stamp; $('#setTagPrompt').checked = S.tagPrompt; $('#setRotate').checked = S.autoRotate !== false;
   $$('input[name=quality]').forEach(r => r.checked = r.value === S.quality);
   $$('input[name=tagDelay]').forEach(r => r.checked = +r.value === S.tagDelay);
   $('#delayField').hidden = !S.tagPrompt;
@@ -1264,23 +1394,49 @@ function renderSites(){
 function renderTagList(){
   $('#tagList').innerHTML = S.tags.map((t, i) => `<button class="chip rm" data-rmtag="${i}" aria-label="Retirer ${esc(t)}">${esc(t)}<i>${ICON_X}</i></button>`).join('') || '<p class="hint">Aucune étiquette.</p>';
 }
-async function drawPreview(){
-  const s = S.sites.find(x => x.logo) || S.sites[0] || null;
-  const lg = await getImg(s?.logo);
-  const c = $('#stampPreview'), g = c.getContext('2d'), W = c.width, H = c.height;
+function drawScene(g, W, H, v = 0){
   const sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, '#8fa3b1'); sky.addColorStop(.42, '#c9cdc8'); sky.addColorStop(.43, '#7d7466'); sky.addColorStop(1, '#5d564b');
   g.fillStyle = sky; g.fillRect(0, 0, W, H);
   g.fillStyle = '#4a6a3f'; g.beginPath(); g.moveTo(0, H*.43); g.lineTo(W*.25, H*.3); g.lineTo(W*.5, H*.38); g.lineTo(W*.78, H*.24); g.lineTo(W, H*.34); g.lineTo(W, H*.43); g.closePath(); g.fill();
   g.fillStyle = '#3b352d'; g.beginPath(); g.moveTo(W*.3, H); g.lineTo(W*.46, H*.47); g.lineTo(W*.56, H*.47); g.lineTo(W*.78, H); g.closePath(); g.fill();
   g.strokeStyle = '#d6d0c3'; g.lineWidth = 16; g.beginPath(); g.moveTo(W*.54, H); g.lineTo(W*.51, H*.5); g.stroke();
-  g.strokeStyle = '#e07b2b'; g.lineWidth = 5; for (let i = 0; i < 6; i++) { g.beginPath(); g.moveTo(W*(.36 + i*.06), H*.9); g.lineTo(W*(.36 + i*.06), H*.7); g.stroke(); }
-  decorate(g, W, H, {time:new Date(), site:s, pos:{lat:46.17170, lon:7.18830, acc:6}, tags:['armature'], note:''}, lg);
+  g.strokeStyle = '#e07b2b'; g.lineWidth = Math.max(3, W / 190); for (let i = 0; i < 6; i++) { g.beginPath(); g.moveTo(W*(.36 + i*.06), H*.9); g.lineTo(W*(.36 + i*.06), H*.7); g.stroke(); }
+}
+const SAMPLE = site => ({time:new Date(), site, pos:{lat:46.17170, lon:7.18830, acc:6}, tags:['armature'], note:'regard R4, profondeur 1.80 m'});
+async function drawPreview(){
+  const s = S.sites.find(x => x.logo) || S.sites[0] || null;
+  const lg = await getImg(s?.logo);
+  const c = $('#stampPreview'), g = c.getContext('2d'), W = c.width, H = c.height;
+  drawScene(g, W, H);
+  decorate(g, W, H, SAMPLE(s), lg, layoutFor(s));
+}
+/* aperçu de la mise en page dans la fiche chantier */
+let seLay = null, seCustomOn = false;
+function seSiteDraft(){ return {name:$('#seName').value.trim() || 'Chantier', number:$('#seNumber').value.trim(), logo:seLogo}; }
+async function drawSeLayout(){
+  const c = $('#seLayPreview'), g = c.getContext('2d'), W = c.width, H = c.height;
+  const lay = seCustomOn ? seLay : defLayout();
+  const lg = await getImg(seLogo);
+  drawScene(g, W, H); decorate(g, W, H, SAMPLE(seSiteDraft()), lg, lay);
+}
+function renderSeLayout(){
+  $('#seCustom').checked = seCustomOn; $('#seLayBox').hidden = !seCustomOn;
+  $('#seCustomHint').textContent = seCustomOn ? 'Réglages ci-dessous, pour ce chantier seulement' : 'Sinon : réglage par défaut (Paramètres › Photos)';
+  $('#seLayLogo').checked = seLay.logo; $('#seLogoOpts').hidden = !seLay.logo;
+  $('#seLogoHint').textContent = seLogo ? 'Sur chaque photo de ce chantier' : 'Choisis d’abord un logo plus haut';
+  $$('input[name=seLayPos]').forEach(r => r.checked = r.value === seLay.logoPos);
+  $('#seLaySize').value = seLay.logoSize; $('#seLaySizeOut').textContent = seLay.logoSize + ' %';
+  $('#seLayBg').checked = seLay.logoBg; $('#seLayBand').checked = seLay.band;
+  $('#seLayLines').hidden = !seLay.band;
+  $('#seLayLines').innerHTML = LINES.map(([k, t]) => `<button class="chip ${seLay.lines[k] ? 'on' : ''}" data-line="${k}" aria-pressed="${!!seLay.lines[k]}">${t}</button>`).join('');
+  drawSeLayout();
 }
 
 /* ---------- Fiche chantier ---------- */
 let editId = null, delArm = false, seLogo = null;
 function allLogos(){ return [...new Set([...PRESET_LOGOS, ...S.logoLib, ...S.sites.map(x => x.logo)].filter(Boolean))]; }
 function renderSeLogo(){
+  if (seLay) { $('#seLogoHint').textContent = seLogo ? 'Sur chaque photo de ce chantier' : 'Choisis d’abord un logo plus haut'; drawSeLayout(); }
   $('#seLogoBox').innerHTML = seLogo ? `<img src="${seLogo}" alt="Logo du chantier">` : '<span>Aucun logo</span>';
   $('#seLogoRemove').hidden = !seLogo;
   const lib = allLogos();
@@ -1295,6 +1451,7 @@ function openSiteEdit(id, useHere){
   $('#seLat').value = s ? s.lat.toFixed(6) : ''; $('#seLon').value = s ? s.lon.toFixed(6) : '';
   $('#seRadius').value = String(s?.radius || 300);
   seLogo = s?.logo || null; renderSeLogo();
+  seCustomOn = !!s?.layout; seLay = clone(layoutFor(s)); renderSeLayout();
   $('#seAddr').value = ''; $('#seMsg').hidden = true;
   $('#seDelete').hidden = !s; $('#seDelete').innerHTML = ICON_TRASH + 'Supprimer';
   if (useHere) fillHere();
@@ -1328,8 +1485,9 @@ function saveSite(){
   if (!(lat >= -90 && lat <= 90) || !(lon >= -180 && lon <= 180)) { seMsg('Position manquante : utilise ta position, une adresse ou les coordonnées.'); return; }
   const radius = +$('#seRadius').value;
   const s = S.sites.find(x => x.id === editId);
-  if (s) Object.assign(s, {name, number, lat, lon, radius, logo:seLogo, example:false});
-  else S.sites.push({id:'s' + Date.now().toString(36), name, number, lat, lon, radius, logo:seLogo});
+  const layout = seCustomOn ? clone(seLay) : undefined;
+  if (s) { Object.assign(s, {name, number, lat, lon, radius, logo:seLogo, example:false}); if (layout) s.layout = layout; else delete s.layout; }
+  else S.sites.push({id:'s' + Date.now().toString(36), name, number, lat, lon, radius, logo:seLogo, ...(layout ? {layout} : {})});
   if (seLogo && !S.logoLib.includes(seLogo)) { S.logoLib.unshift(seLogo); S.logoLib = S.logoLib.slice(0, 30); }
   save(); closeSheet($('#sheetSiteEdit')); renderSites(); renderSiteChip(); drawPreview(); note('Chantier enregistré');
 }
@@ -1455,7 +1613,7 @@ async function openImport(){
   imp.sel = new Set([...imp.sel].filter(id => ids.has(id)));
   if ($('#sheetImport').hidden) {
     imp.sel = new Set(ids); imp.tags = new Set(); imp.site = undefined; imp.sug = null;
-    $('#impNote').value = ''; $('#impStamp').checked = S.stamp; $('#impMsg').hidden = true;
+    $('#impNote').value = ''; $('#impStamp').checked = true; $('#impMsg').hidden = true;
   }
   for (const it of items) await impMeta(it);
   if (imp.site === undefined) impSuggest();
@@ -1510,7 +1668,7 @@ async function doImport(){
       src.close?.();
       const name = fileName(info), path = pathFor(info);
       await DB.put({id:'i' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7), blob, created:Date.now(), thumb,
-        meta:{name, path, description:describe(info), siteId:site ? site.id : 'none', taken:info.time.toISOString(), tags:tags.slice(), imported:true}, error:''});
+        meta:{name, path, description:describe(info), siteId:site ? site.id : 'none', taken:info.time.toISOString(), tags:tags.slice(), imported:true, ...(info.pos ? {lat:info.pos.lat, lon:info.pos.lon} : {})}, error:''});
       await INBOX.del([it.id]); imp.sel.delete(it.id); delete imp.meta[it.id];
       ok++; lastPath = path.join(' / '); setLastThumb(thumb);
     } catch (e) { bad++; }
@@ -1518,7 +1676,7 @@ async function doImport(){
   imp.busy = false;
   imp.items = (await INBOX.all()).sort((a, b) => a.received - b.received);
   await refreshQueue(); processQueue(); refreshInboxBadge();
-  if (!$('#gallery').hidden && !gal.selMode) loadGallery(true);
+  refreshView();
   const msg = `${ok} photo${ok > 1 ? 's' : ''} importée${ok > 1 ? 's' : ''}` + (lastPath ? ' → ' + lastPath : '') + (bad ? ` · ${bad} illisible${bad > 1 ? 's' : ''} (format non pris en charge)` : '');
   if (!imp.items.length) { closeSheet($('#sheetImport')); note(msg, 3800); }
   else {
@@ -1581,24 +1739,50 @@ async function loadFolder(){
 
 
 /* ---------- Galerie ---------- */
-const gal = {site:'__all', items:[], next:null, loading:false, err:null, sel:new Set(), selMode:false, tag:null, urls:[]};
+const gal = {site:'__all', items:[], next:null, loading:false, err:null, sel:new Set(), selMode:false, tag:null, urls:[], view:'grid', range:'all', from:'', to:''};
 const blobCache = {};
 const DAYS = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
 function localItem(it){
   return {key:'l' + it.id, src:'local', id:it.id, name:it.meta.name, time:new Date(it.meta.taken || it.created),
-    tags:it.meta.tags || [], siteId:it.meta.siteId || 'none', blob:it.blob, link:''};
+    tags:it.meta.tags || [], siteId:it.meta.siteId || 'none', blob:it.blob, link:'', thumb:it.thumb || '',
+    pos:it.meta.lat != null ? {lat:+it.meta.lat, lon:+it.meta.lon} : parseGps(it.meta.description)};
 }
 function driveItem(f){
   const ap = f.appProperties || {};
   return {key:'d' + f.id, src:'drive', id:f.id, name:f.name, time:new Date(ap.taken || f.createdTime),
     tags:ap.tags ? ap.tags.split('|').filter(Boolean) : [], siteId:ap.site || 'none',
-    thumb:f.thumbnailLink ? f.thumbnailLink.replace(/=s\d+$/, '=s400') : '', big:f.thumbnailLink ? f.thumbnailLink.replace(/=s\d+$/, '=s2000') : '', link:f.webViewLink || ''};
+    thumb:f.thumbnailLink ? f.thumbnailLink.replace(/=s\d+$/, '=s400') : '', big:f.thumbnailLink ? f.thumbnailLink.replace(/=s\d+$/, '=s2000') : '', link:f.webViewLink || '',
+    pos:ap.lat && ap.lon ? {lat:+ap.lat, lon:+ap.lon} : parseGps(f.description)};
 }
+function parseGps(d){ const m = /GPS : (-?\d+(?:\.\d+)?), (-?\d+(?:\.\d+)?)/.exec(d || ''); return m ? {lat:+m[1], lon:+m[2]} : null; }
+/* période */
+function rangeBounds(){
+  const now = new Date(), sod = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  switch (gal.range) {
+    case 'today': return {from:sod(now), to:null};
+    case '7': return {from:new Date(sod(now).getTime() - 6 * 864e5), to:null};
+    case '30': return {from:new Date(sod(now).getTime() - 29 * 864e5), to:null};
+    case 'custom': {
+      const f = gal.from ? new Date(gal.from + 'T00:00:00') : null, t = gal.to ? new Date(gal.to + 'T23:59:59.999') : null;
+      return {from:f && !isNaN(f) ? f : null, to:t && !isNaN(t) ? t : null};
+    }
+  }
+  return {from:null, to:null};
+}
+function inRange(t){ const r = rangeBounds(); return (!r.from || t >= r.from) && (!r.to || t <= r.to); }
+function galVisibleList(){ return gal.items.filter(i => (!gal.tag || i.tags.includes(gal.tag)) && inRange(i.time)).sort((a, b) => b.time - a.time); }
+function driveQuery(){
+  let q = "trashed=false and mimeType='image/jpeg' and appProperties has { key='pc' and value='1' }";
+  if (gal.site !== '__all') q += ` and appProperties has { key='site' and value='${qEsc(gal.site === '__none' ? 'none' : gal.site)}' }`;
+  const r = rangeBounds(); if (r.from) q += ` and createdTime >= '${r.from.toISOString()}'`;
+  return q;
+}
+function refreshView(){ if ($('#gallery').hidden) return; if (gal.view === 'map') loadMapData(); else if (!gal.selMode && !gal.loading) loadGallery(true); }
 function matchSite(id){ return gal.site === '__all' || (gal.site === '__none' ? (!id || id === 'none') : id === gal.site); }
 function openGallery(){
   const cur = currentSite();
   gal.site = cur ? cur.id : '__all'; gal.sel.clear(); gal.selMode = false; gal.tag = null;
-  $('#gallery').hidden = false; renderGalSites(); loadGallery(true);
+  $('#gallery').hidden = false; renderGalSites(); renderRange(); setView(gal.view);
 }
 function closeGallery(){ $('#gallery').hidden = true; gal.urls.forEach(u => URL.revokeObjectURL(u)); gal.urls = []; }
 function renderGalSites(){
@@ -1615,12 +1799,15 @@ async function loadGallery(reset){
     renderGallery();
   }
   const r = queueReason();
-  if (r && r.a !== null && r.a !== 'root') gal.err = r;
+  if (DEMO && !tokenValid()) {
+    if (reset) gal.items = gal.items.concat((await demoItems()).filter(i => matchSite(i.siteId)));
+    gal.err = {t:'Aperçu : photos fictives de démonstration. Dans l’app, tu verras tes photos du Drive.', a:null};
+  }
+  else if (r && r.a !== null && r.a !== 'root') gal.err = r;
   else if (!navigator.onLine) gal.err = {t:'Hors ligne · seules les photos en attente sont visibles', a:null};
   else {
     try {
-      let q = "trashed=false and mimeType='image/jpeg' and appProperties has { key='pc' and value='1' }";
-      if (gal.site !== '__all') q += ` and appProperties has { key='site' and value='${qEsc(gal.site === '__none' ? 'none' : gal.site)}' }`;
+      const q = driveQuery();
       const params = {q, orderBy:'createdTime desc', pageSize:'60', fields:'nextPageToken,files(id,name,thumbnailLink,webViewLink,createdTime,appProperties)'};
       if (!reset && gal.next) params.pageToken = gal.next;
       const res = await api('https://www.googleapis.com/drive/v3/files?' + new URLSearchParams(params));
@@ -1642,10 +1829,10 @@ function renderGallery(){
   } else if (pend) {
     $('#galInfoText').textContent = `${pend} photo${pend > 1 ? 's' : ''} en attente d'envoi`; ib.hidden = false; ib.textContent = 'Voir la file'; ib.dataset.act = 'queue'; info.hidden = false;
   } else info.hidden = true;
-  const tagsHere = [...new Set(gal.items.flatMap(i => i.tags))];
+  const tagsHere = [...new Set(gal.items.filter(i => inRange(i.time)).flatMap(i => i.tags))];
   if (gal.tag && !tagsHere.includes(gal.tag)) gal.tag = null;
   $('#galTags').innerHTML = tagsHere.length ? tagsHere.map(t => `<button class="chip ${gal.tag === t ? 'on' : ''}" data-gtag="${esc(t)}">${esc(t)}</button>`).join('') : '';
-  const list = gal.items.filter(i => !gal.tag || i.tags.includes(gal.tag)).sort((a, b) => b.time - a.time);
+  const list = galVisibleList();
   let h = '', day = '';
   for (const it of list) {
     const d = DAYS[it.time.getDay()] + ' ' + fmtDate(it.time);
@@ -1655,7 +1842,7 @@ function renderGallery(){
     else if (!src && blobCache[it.id]) src = blobCache[it.id];
     h += `<button class="tile ${gal.sel.has(it.key) ? 'sel' : ''}" data-k="${esc(it.key)}" aria-label="${esc(it.name)}"><img loading="lazy" alt="" ${src ? `src="${esc(src)}"` : ''} data-fid="${it.src === 'drive' ? esc(it.id) : ''}">${it.src === 'local' ? '<span class="tbadge">En attente</span>' : ''}<span class="tcheck"></span></button>`;
   }
-  if (!list.length) h = `<div class="empty" style="grid-column:1/-1">${gal.loading ? 'Chargement…' : 'Aucune photo pour ce chantier.'}</div>`;
+  if (!list.length) h = `<div class="empty" style="grid-column:1/-1">${gal.loading ? 'Chargement…' : (gal.range !== 'all' ? 'Aucune photo pour ce chantier sur cette période.' : 'Aucune photo pour ce chantier.')}</div>`;
   $('#galGrid').innerHTML = h;
   $$('#galGrid img[data-fid]:not([src])').forEach(img => img.dataset.fid && fetchThumb(img));
   $('#galMore').hidden = !gal.next;
@@ -1679,13 +1866,199 @@ async function fetchThumb(img){
 }
 function galItem(key){ return gal.items.find(i => i.key === key); }
 
+/* ---------- Vue : grille / carte, filtres ---------- */
+function setView(v){
+  gal.view = v;
+  const map = v === 'map';
+  $('#tabGrid').classList.toggle('on', !map); $('#tabMap').classList.toggle('on', map);
+  $('#tabGrid').setAttribute('aria-selected', String(!map)); $('#tabMap').setAttribute('aria-selected', String(map));
+  $('#galScroll').hidden = map; $('#mapWrap').hidden = !map;
+  $('#galSelect').hidden = map; $('#galTitle').textContent = map ? 'Carte' : 'Photos';
+  if (map) { gal.selMode = false; gal.sel.clear(); $('#galBar').hidden = true; openMap(); }
+  else loadGallery(true);
+}
+function renderRange(){
+  $('#galRange').value = gal.range; $('#galCustom').hidden = gal.range !== 'custom';
+  $('#galFrom').value = gal.from; $('#galTo').value = gal.to;
+}
+function filtersChanged(){ $('#mapStrip').hidden = true; if (gal.view === 'map') loadMapData(); else loadGallery(true); }
+
+/* ---------- Carte des photos ---------- */
+const LEAFLET = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/';
+const MAP = {map:null, layer:null, sitesLayer:null, items:[], group:[], token:0, loading:false, err:'', me:null};
+let leafletP = null;
+function loadLeaflet(){
+  if (window.L && window.L.map) return Promise.resolve();
+  return leafletP || (leafletP = new Promise((res, rej) => {
+    const sc = document.createElement('script'); sc.src = LEAFLET + 'leaflet.min.js';
+    sc.onload = () => res(); sc.onerror = () => { leafletP = null; sc.remove(); rej(new Error('carte non chargée')); };
+    document.head.appendChild(sc);
+  }));
+}
+async function openMap(){
+  renderMapInfo('Chargement de la carte…');
+  try { await loadLeaflet(); }
+  catch (e) { renderMapInfo(navigator.onLine ? 'La carte n’a pas pu être chargée. Réessaie avec le bouton Actualiser.' : 'Carte indisponible hors ligne. Réessaie avec du réseau.'); return; }
+  if (!MAP.map) initMap();
+  requestAnimationFrame(() => MAP.map && MAP.map.invalidateSize());
+  loadMapData();
+}
+function initMap(){
+  const L = window.L;
+  const m = MAP.map = L.map('map', {zoomControl:true, attributionControl:true}).setView([46.2, 7.3], 10);
+  m.attributionControl.setPrefix(false);
+  const bases = {
+    'Plan CH': L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg', {maxNativeZoom:18, maxZoom:20, attribution:'© swisstopo'}),
+    'Aérien CH': L.tileLayer('https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage/default/current/3857/{z}/{x}/{y}.jpeg', {maxNativeZoom:19, maxZoom:20, attribution:'© swisstopo'}),
+    'OpenStreetMap': L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxNativeZoom:19, maxZoom:20, attribution:'© OpenStreetMap'})
+  };
+  (bases[S.mapLayer] || bases['Plan CH']).addTo(m);
+  L.control.layers(bases, null, {position:'topright'}).addTo(m);
+  m.on('baselayerchange', e => { S.mapLayer = e.name; save(); });
+  MAP.sitesLayer = L.layerGroup().addTo(m);
+  MAP.layer = L.layerGroup().addTo(m);
+  m.on('zoomend', () => drawMap(false));
+  const Loc = L.Control.extend({options:{position:'topleft'}, onAdd(){
+    const b = L.DomUtil.create('button', 'map-loc'); b.type = 'button'; b.title = 'Ma position'; b.setAttribute('aria-label', 'Ma position');
+    b.innerHTML = '<svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7"/></svg>';
+    L.DomEvent.disableClickPropagation(b); L.DomEvent.on(b, 'click', locateMe); return b;
+  }});
+  new Loc().addTo(m);
+}
+function locateMe(){
+  if (!pos) { note(IN_FRAME ? 'La position est bloquée dans cet aperçu.' : 'Position GPS pas encore disponible.'); return; }
+  const ll = [pos.lat, pos.lon];
+  if (!MAP.me) MAP.me = window.L.circleMarker(ll, {radius:8, color:'#fff', weight:3, fillColor:'#2f80ed', fillOpacity:1}).addTo(MAP.map); else MAP.me.setLatLng(ll);
+  MAP.map.setView(ll, 17);
+}
+async function loadMapData(){
+  const tok = ++MAP.token; MAP.loading = true; MAP.err = ''; renderMapInfo();
+  let items = (await DB.all()).filter(it => matchSite(it.meta.siteId || 'none')).map(localItem);
+  const r = queueReason();
+  if (DEMO && !tokenValid()) items = items.concat((await demoItems()).filter(i => matchSite(i.siteId)));
+  else if (r && r.a !== null && r.a !== 'root') MAP.err = r.t;
+  else if (!navigator.onLine) MAP.err = 'Hors ligne · seules les photos en attente sont visibles';
+  else {
+    try {
+      let pageToken = null, pages = 0;
+      do {
+        const params = {q:driveQuery(), orderBy:'createdTime desc', pageSize:'1000', fields:'nextPageToken,files(id,name,thumbnailLink,webViewLink,createdTime,description,appProperties)'};
+        if (pageToken) params.pageToken = pageToken;
+        const res = await api('https://www.googleapis.com/drive/v3/files?' + new URLSearchParams(params));
+        if (tok !== MAP.token) return;
+        items = items.concat((res.files || []).map(driveItem));
+        pageToken = res.nextPageToken; pages++;
+      } while (pageToken && pages < 5);
+    } catch (e) { MAP.err = 'Lecture du Drive impossible : ' + e.message; }
+  }
+  if (tok !== MAP.token) return;
+  MAP.items = items.filter(i => inRange(i.time)).sort((a, b) => b.time - a.time);
+  MAP.loading = false; drawMap(true); renderMapInfo();
+}
+const markerThumb = it => it.src === 'demo' ? it.url : it.src === 'local' ? it.thumb : (it.thumb ? it.thumb.replace(/=s\d+$/, '=s120') : '');
+function drawMap(fit){
+  const m = MAP.map, L = window.L; if (!m || !L) return;
+  MAP.layer.clearLayers(); MAP.sitesLayer.clearLayers();
+  const sites = S.sites.filter(s => gal.site === '__all' || s.id === gal.site);
+  for (const s of sites) {
+    const r = s.radius || 300;
+    L.circle([s.lat, s.lon], {radius:r, color:'#f2c230', weight:1.5, fillColor:'#f2c230', fillOpacity:.07, interactive:false}).addTo(MAP.sitesLayer);
+    const c0 = m.latLngToLayerPoint([s.lat, s.lon]), c1 = m.latLngToLayerPoint([s.lat + r / 111320, s.lon]);
+    const off = Math.round(Math.max(Math.abs(c0.y - c1.y), 30));
+    L.marker([s.lat, s.lon], {interactive:false, keyboard:false, icon:L.divIcon({className:'site-tip', iconSize:[0, 0], iconAnchor:[0, off], html:`<span class="site-lbl">${esc(siteLabel(s))}</span>`})}).addTo(MAP.sitesLayer);
+  }
+  const withPos = MAP.items.filter(i => i.pos);
+  const groups = [];
+  for (const it of withPos) {
+    const p = m.latLngToLayerPoint([it.pos.lat, it.pos.lon]);
+    const g = groups.find(g => Math.abs(g.p.x - p.x) < 44 && Math.abs(g.p.y - p.y) < 44);
+    if (g) g.items.push(it); else groups.push({p, ll:[it.pos.lat, it.pos.lon], items:[it]});
+  }
+  for (const g of groups) {
+    const top = g.items[0], th = markerThumb(top), n = g.items.length;
+    const icon = L.divIcon({className:'pm-wrap', iconSize:[48, 48], iconAnchor:[24, 24],
+      html:`<span class="pm ${th ? '' : 'nothumb'}">${th ? `<img src="${esc(th)}" alt="">` : ''}</span>${n > 1 ? `<b class="pmc">${n}</b>` : ''}`});
+    L.marker(g.ll, {icon, title:n > 1 ? n + ' photos' : top.name, riseOnHover:true}).on('click', () => openGroup(g.items)).addTo(MAP.layer);
+  }
+  if (fit) {
+    const pts = withPos.map(i => [i.pos.lat, i.pos.lon]);
+    if (!pts.length) sites.forEach(s => pts.push([s.lat, s.lon]));
+    if (pts.length) m.fitBounds(L.latLngBounds(pts).pad(.2), {maxZoom:17, animate:false});
+  }
+  MAP.groups = groups.length;
+}
+function renderMapInfo(msg){
+  const el = $('#mapInfo');
+  if (msg) { el.textContent = msg; el.hidden = false; return; }
+  if (MAP.loading) { el.textContent = 'Chargement des photos…'; el.hidden = false; return; }
+  const w = MAP.items.filter(i => i.pos).length, np = MAP.items.length - w;
+  let t = MAP.err ? MAP.err + ' · ' : '';
+  t += w ? `${w} photo${w > 1 ? 's' : ''} sur la carte` : 'Aucune photo avec position pour ce filtre';
+  if (np) t += ` · ${np} sans GPS`;
+  if (DEMO && !tokenValid()) t += ' · photos de démonstration (le fond de carte peut manquer dans l’aperçu)';
+  el.textContent = t; el.hidden = false;
+}
+function openGroup(items){
+  items = items.slice().sort((a, b) => b.time - a.time);
+  if (items.length === 1) { openViewer(items[0], items); return; }
+  MAP.group = items;
+  const ids = [...new Set(items.map(i => i.siteId))];
+  const site = ids.length === 1 ? S.sites.find(s => s.id === ids[0]) : null;
+  const d1 = fmtDate(items[items.length - 1].time), d2 = fmtDate(items[0].time);
+  $('#msTitle').textContent = `${items.length} photos · ${site ? siteLabel(site) : ids.length === 1 ? 'À classer' : 'plusieurs chantiers'} · ${d1 === d2 ? d1 : d1 + ' – ' + d2}`;
+  $('#msList').innerHTML = items.map(it => { const th = markerThumb(it) || (it.src === 'drive' ? it.thumb : ''); return `<button data-mk="${esc(it.key)}" aria-label="${esc(it.name)}">${th ? `<img src="${esc(th)}" alt="" loading="lazy">` : ''}<small>${pad2(it.time.getDate())}.${pad2(it.time.getMonth() + 1)} ${fmtTime(it.time)}</small></button>`; }).join('');
+  $('#mapStrip').hidden = false;
+}
+
+/* ---------- Photos de démonstration (aperçu uniquement) ---------- */
+const DEMO = IN_FRAME;
+let demoList = null, demoP = null;
+function demoItems(){
+  if (demoList) return Promise.resolve(demoList);
+  return demoP || (demoP = (async () => {
+    let seed = 7; const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+    const plan = [];
+    for (const st of S.sites.slice(0, 4)) for (let i = 0; i < 7; i++)
+      plan.push({site:st, pos:{lat:st.lat + (rnd() - .5) * .0026, lon:st.lon + (rnd() - .5) * .0036, acc:5}, days:Math.floor(rnd() * 26), tag:S.tags.length ? S.tags[Math.floor(rnd() * S.tags.length)] : ''});
+    plan.push({site:null, pos:{lat:46.1455, lon:7.1301, acc:8}, days:1, tag:''}, {site:null, pos:{lat:46.2102, lon:7.2605, acc:6}, days:9, tag:'défaut'}, {site:null, pos:null, days:4, tag:''});
+    const out = [], now = new Date();
+    for (let i = 0; i < plan.length; i++) {
+      const pl = plan[i], portrait = i % 4 === 3, W = portrait ? 600 : 800, H = portrait ? 800 : 600;
+      const t = new Date(now.getFullYear(), now.getMonth(), now.getDate() - pl.days, 7 + Math.floor(rnd() * 10), Math.floor(rnd() * 60));
+      const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+      drawScene(g, W, H);
+      g.fillStyle = `hsla(${Math.floor(rnd() * 360)},45%,50%,.22)`; g.fillRect(0, 0, W, H);
+      g.fillStyle = 'rgba(255,255,255,.85)'; g.font = `700 ${Math.round(W / 9)}px Barlow, Arial, sans-serif`; g.textAlign = 'center'; g.fillText('DÉMO ' + (i + 1), W / 2, H * .3); g.textAlign = 'start';
+      const info = {time:t, site:pl.site ? {...pl.site} : null, pos:pl.pos, tags:pl.tag ? [pl.tag] : [], note:''};
+      decorate(g, W, H, info, await getImg(pl.site?.logo), layoutFor(pl.site));
+      const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', .8));
+      const url = URL.createObjectURL(blob);
+      const nm = `${t.getFullYear()}-${pad2(t.getMonth() + 1)}-${pad2(t.getDate())}_${pad2(t.getHours())}h${pad2(t.getMinutes())}_${slug(pl.site ? pl.site.name : 'A-classer')}${pl.tag ? '_' + slug(pl.tag) : ''}.jpg`;
+      out.push({key:'x' + i, src:'demo', id:'x' + i, name:nm, time:t, tags:info.tags, siteId:pl.site ? pl.site.id : 'none', url, thumb:url, link:'', pos:pl.pos ? {lat:pl.pos.lat, lon:pl.pos.lon} : null});
+    }
+    demoList = out; return out;
+  })());
+}
+
 /* ---------- Visionneuse ---------- */
-let viewItem = null, viewUrl = null;
-async function openViewer(item){
+let viewItem = null, viewUrl = null, viewList = [], viewIdx = 0;
+function openViewer(item, list){
+  viewList = (list && list.length) ? list.slice() : [item];
+  viewIdx = viewList.findIndex(x => x.key === item.key);
+  if (viewIdx < 0) { viewList = [item]; viewIdx = 0; }
+  $('#viewer').classList.remove('chrome-off');
+  showViewerItem();
+  $('#viewer').hidden = false;
+}
+const bigSrc = it => it.src === 'demo' ? it.url : it.src === 'drive' ? (it.big || blobCache[it.id] || '') : '';
+function showViewerItem(){
+  const item = viewList[viewIdx]; if (!item) { closeViewer(); return; }
   viewItem = item;
   const img = $('#viewerImg');
+  img.onerror = null;
   if (viewUrl) { URL.revokeObjectURL(viewUrl); viewUrl = null; }
   if (item.src === 'local') { viewUrl = URL.createObjectURL(item.blob); img.src = viewUrl; }
+  else if (item.src === 'demo') img.src = item.url;
   else {
     img.src = item.big || blobCache[item.id] || '';
     img.onerror = async () => { img.onerror = null; try { viewUrl = URL.createObjectURL(await driveBlob(item.id)); img.src = viewUrl; } catch (e) { note('Photo illisible : ' + e.message); } };
@@ -1694,9 +2067,67 @@ async function openViewer(item){
   $('#viewerName').textContent = item.name;
   $('#viewerSub').textContent = [site ? siteLabel(site) : (item.siteId && item.siteId !== 'none' ? 'Chantier supprimé' : 'À classer'), DAYS[item.time.getDay()] + ' ' + fmtDate(item.time) + ' ' + fmtTime(item.time), item.tags.join(', '), item.src === 'local' ? 'en attente d’envoi' : ''].filter(Boolean).join(' · ');
   const a = $('#viewerDrive'); a.hidden = !item.link; if (item.link) a.href = item.link;
-  $('#viewer').hidden = false;
+  const n = viewList.length;
+  $('#viewerCount').hidden = n < 2; $('#viewerCount').textContent = `${viewIdx + 1} / ${n}`;
+  $('#viewerPrev').hidden = $('#viewerNext').hidden = n < 2;
+  $('#viewerPrev').disabled = viewIdx === 0; $('#viewerNext').disabled = viewIdx === n - 1;
+  [viewList[viewIdx - 1], viewList[viewIdx + 1]].forEach(it => { const u = it && bigSrc(it); if (u) { const i = new Image(); i.src = u; } });
 }
-function closeViewer(){ $('#viewer').hidden = true; $('#viewerImg').onerror = null; if (viewUrl) { URL.revokeObjectURL(viewUrl); viewUrl = null; } viewItem = null; }
+function closeViewer(){ $('#viewer').hidden = true; $('#viewerImg').onerror = null; if (viewUrl) { URL.revokeObjectURL(viewUrl); viewUrl = null; } viewItem = null; viewList = []; }
+let vAnim = false;
+function viewerGo(d){
+  const n = viewIdx + d, img = $('#viewerImg'), st = $('#viewerStage');
+  if (vAnim) return;
+  if (n < 0 || n >= viewList.length) { st.classList.add('anim'); img.style.transform = ''; img.style.opacity = ''; return; }
+  vAnim = true; st.classList.add('anim');
+  img.style.transform = `translateX(${-d * 100}%)`; img.style.opacity = '0';
+  setTimeout(() => {
+    st.classList.remove('anim'); viewIdx = n; showViewerItem();
+    img.style.transform = `translateX(${d * 40}%)`; img.style.opacity = '0';
+    requestAnimationFrame(() => requestAnimationFrame(() => { st.classList.add('anim'); img.style.transform = ''; img.style.opacity = ''; setTimeout(() => { vAnim = false; }, 210); }));
+  }, 180);
+}
+function bindViewer(){
+  const st = $('#viewerStage'), img = $('#viewerImg');
+  let sw = null;
+  st.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    sw = {x:e.clientX, y:e.clientY, t:performance.now(), dx:0, dy:0, axis:null};
+    try { st.setPointerCapture(e.pointerId); } catch (err) {}
+    st.classList.remove('anim');
+  });
+  st.addEventListener('pointermove', e => {
+    if (!sw || vAnim) return;
+    sw.dx = e.clientX - sw.x; sw.dy = e.clientY - sw.y;
+    if (!sw.axis && Math.hypot(sw.dx, sw.dy) > 8) sw.axis = Math.abs(sw.dx) > Math.abs(sw.dy) ? 'x' : 'y';
+    if (sw.axis === 'x') {
+      const edge = (sw.dx > 0 && viewIdx === 0) || (sw.dx < 0 && viewIdx === viewList.length - 1);
+      img.style.transform = `translateX(${edge ? sw.dx / 3 : sw.dx}px)`;
+    } else if (sw.axis === 'y' && sw.dy > 0) {
+      img.style.transform = `translateY(${sw.dy}px) scale(${Math.max(.85, 1 - sw.dy / 1500)})`; img.style.opacity = String(Math.max(.4, 1 - sw.dy / 400));
+    }
+  });
+  const end = e => {
+    if (!sw) return;
+    const s0 = sw; sw = null;
+    const dt = Math.max(1, performance.now() - s0.t), w = st.clientWidth || 360;
+    if (s0.axis === 'x') {
+      const fast = Math.abs(s0.dx) / dt > .45 && Math.abs(s0.dx) > 30;
+      if (Math.abs(s0.dx) > w * .18 || fast) viewerGo(s0.dx < 0 ? 1 : -1);
+      else { st.classList.add('anim'); img.style.transform = ''; }
+    } else if (s0.axis === 'y') {
+      if (s0.dy > 110) { img.style.transform = ''; img.style.opacity = ''; closeViewer(); }
+      else { st.classList.add('anim'); img.style.transform = ''; img.style.opacity = ''; }
+    } else if (e.type === 'pointerup') $('#viewer').classList.toggle('chrome-off');
+  };
+  st.addEventListener('pointerup', end); st.addEventListener('pointercancel', end);
+  $('#viewerPrev').addEventListener('click', () => viewerGo(-1));
+  $('#viewerNext').addEventListener('click', () => viewerGo(1));
+  document.addEventListener('keydown', e => {
+    if ($('#viewer').hidden || stack.length) return;
+    if (e.key === 'ArrowLeft') viewerGo(-1); else if (e.key === 'ArrowRight') viewerGo(1);
+  });
+}
 
 /* ---------- Partage (WhatsApp, e-mail…) ---------- */
 let share = null;
@@ -1722,7 +2153,7 @@ async function prepareShare(){
     for (let i = 0; i < share.items.length; i++) {
       const it = share.items[i];
       st.textContent = `Préparation ${i + 1} / ${share.items.length}…`;
-      let b = it.src === 'local' ? it.blob : await driveBlob(it.id);
+      let b = it.src === 'local' ? it.blob : it.src === 'demo' ? await (await fetch(it.url)).blob() : await driveBlob(it.id);
       if (reduce) b = await reduceBlob(b);
       if (tok !== share?.token) return;
       files.push(new File([b], it.name, {type:'image/jpeg', lastModified:it.time.getTime()}));
@@ -1760,12 +2191,12 @@ async function doShare(){
 /* ---------- Suppression de photos ---------- */
 function askDeletePhotos(items){
   items = items.filter(Boolean); if (!items.length) return;
-  const n = items.length, nd = items.filter(i => i.src === 'drive').length, nl = n - nd;
+  const n = items.length, nd = items.filter(i => i.src !== 'local').length, nl = n - nd, real = items.some(i => i.src === 'drive');
   const L = [];
   if (nd) L.push(`${nd > 1 ? nd + ' photos déjà envoyées iront' : 'La photo déjà envoyée ira'} dans la corbeille du Drive (récupérable${nd > 1 ? 's' : ''} pendant 30 jours).`);
   if (nl) L.push(`${nl > 1 ? nl + ' photos en attente seront effacées' : 'La photo en attente sera effacée'} du téléphone, sans envoi.`);
-  if (nd && !navigator.onLine) { note('Hors ligne : la suppression des photos du Drive demande du réseau.', 3800); return; }
-  if (nd && !tokenValid()) { note('Session Google expirée : reconnecte-toi pour supprimer des photos du Drive.', 4200); return; }
+  if (real && !navigator.onLine) { note('Hors ligne : la suppression des photos du Drive demande du réseau.', 3800); return; }
+  if (real && !tokenValid()) { note('Session Google expirée : reconnecte-toi pour supprimer des photos du Drive.', 4200); return; }
   confirmBox(n > 1 ? `Supprimer ${n} photos ?` : 'Supprimer cette photo ?', L.map(esc).join('<br>'), 'Supprimer', () => deletePhotos(items));
 }
 async function deletePhotos(items){
@@ -1774,26 +2205,46 @@ async function deletePhotos(items){
   for (const it of items) {
     try {
       if (it.src === 'local') { removed.add(it.id); await DB.del(it.id); }
+      else if (it.src === 'demo') { demoList = (demoList || []).filter(x => x.key !== it.key); }
       else await api(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(it.id)}?fields=id,trashed`, {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({trashed:true})});
       if (blobCache[it.id]) { URL.revokeObjectURL(blobCache[it.id]); delete blobCache[it.id]; }
       gal.items = gal.items.filter(x => x.key !== it.key); gal.sel.delete(it.key); ok++;
+      MAP.items = MAP.items.filter(x => x.key !== it.key); MAP.group = MAP.group.filter(x => x.key !== it.key);
     } catch (e) { bad++; lastErr = e.status === 403 ? 'droits insuffisants sur ce fichier' : e.message; }
   }
-  if (viewItem && items.some(i => i.key === viewItem.key) && !gal.items.some(x => x.key === viewItem.key)) closeViewer();
+  if (!$('#viewer').hidden && viewItem) {
+    const gone = new Set(items.filter(i => !gal.items.some(x => x.key === i.key) && !(MAP.items || []).some(x => x.key === i.key)).map(i => i.key));
+    const curGone = gone.has(viewItem.key);
+    viewList = viewList.filter(x => !gone.has(x.key));
+    if (!viewList.length) closeViewer();
+    else if (curGone) { viewIdx = Math.min(viewIdx, viewList.length - 1); showViewerItem(); }
+    else { viewIdx = Math.max(0, viewList.findIndex(x => x.key === viewItem.key)); showViewerItem(); }
+  }
   if (!gal.sel.size) gal.selMode = false;
   await refreshQueue(); renderGallery();
+  if (gal.view === 'map' && MAP.map) { drawMap(false); renderMapInfo(); if (!$('#mapStrip').hidden) { if (MAP.group.length > 1) openGroup(MAP.group); else $('#mapStrip').hidden = true; } }
   note(bad ? `${ok} supprimée${ok > 1 ? 's' : ''} · ${bad} échec${bad > 1 ? 's' : ''} : ${lastErr}` : (ok > 1 ? `${ok} photos supprimées` : 'Photo supprimée'), bad ? 5000 : 2800);
 }
 
 function bindGallery(){
   $('#galBack').addEventListener('click', closeGallery);
-  $('#galRefresh').addEventListener('click', () => loadGallery(true));
+  $('#galRefresh').addEventListener('click', () => { if (gal.view === 'map') { if (!MAP.map) openMap(); else loadMapData(); } else loadGallery(true); });
+  $('#tabGrid').addEventListener('click', () => { if (gal.view !== 'grid') setView('grid'); });
+  $('#tabMap').addEventListener('click', () => { if (gal.view !== 'map') setView('map'); });
+  $('#galRange').addEventListener('change', e => {
+    gal.range = e.target.value;
+    if (gal.range === 'custom' && !gal.from && !gal.to) { const d = new Date(); gal.to = d.toISOString().slice(0, 10); d.setDate(d.getDate() - 13); gal.from = d.toISOString().slice(0, 10); }
+    renderRange(); filtersChanged();
+  });
+  ['#galFrom', '#galTo'].forEach(q => $(q).addEventListener('change', () => { gal.from = $('#galFrom').value; gal.to = $('#galTo').value; filtersChanged(); }));
+  $('#msClose').addEventListener('click', () => { $('#mapStrip').hidden = true; });
+  $('#msList').addEventListener('click', e => { const b = e.target.closest('[data-mk]'); if (!b) return; const it = MAP.group.find(x => x.key === b.dataset.mk); if (it) openViewer(it, MAP.group); });
   $('#galSelect').addEventListener('click', () => { gal.selMode = !gal.selMode; if (!gal.selMode) gal.sel.clear(); renderGallery(); });
   $('#galCancel').addEventListener('click', () => { gal.selMode = false; gal.sel.clear(); renderGallery(); });
   $('#galDelete').addEventListener('click', () => askDeletePhotos([...gal.sel].map(galItem)));
   $('#galShare').addEventListener('click', () => { const items = [...gal.sel].map(galItem).filter(Boolean); if (items.length) openShare(items); });
   $('#galMore').addEventListener('click', () => loadGallery(false));
-  $('#galSites').addEventListener('click', e => { const b = e.target.closest('[data-gsite]'); if (!b) return; gal.site = b.dataset.gsite; gal.sel.clear(); gal.tag = null; renderGalSites(); loadGallery(true); });
+  $('#galSites').addEventListener('click', e => { const b = e.target.closest('[data-gsite]'); if (!b) return; gal.site = b.dataset.gsite; gal.sel.clear(); gal.tag = null; renderGalSites(); filtersChanged(); });
   $('#galTags').addEventListener('click', e => { const b = e.target.closest('[data-gtag]'); if (!b) return; gal.tag = gal.tag === b.dataset.gtag ? null : b.dataset.gtag; renderGallery(); });
   $('#galInfoBtn').addEventListener('click', e => {
     const a = e.currentTarget.dataset.act;
@@ -1816,7 +2267,7 @@ function bindGallery(){
     if (lpFired) { lpFired = false; return; }
     const it = galItem(t.dataset.k); if (!it) return;
     if (gal.selMode) { gal.sel.has(it.key) ? gal.sel.delete(it.key) : gal.sel.add(it.key); renderGallery(); }
-    else openViewer(it);
+    else openViewer(it, galVisibleList());
   });
   $('#shReduce').addEventListener('change', prepareShare);
   $('#shGo').addEventListener('click', doShare);
@@ -1903,7 +2354,7 @@ function bind(){
   $('#viewerClose').addEventListener('click', closeViewer);
   $('#viewerShare').addEventListener('click', () => { if (viewItem) openShare([viewItem]); });
   $('#viewerDelete').addEventListener('click', () => { if (viewItem) askDeletePhotos([viewItem]); });
-  bindGallery();
+  bindGallery(); bindViewer();
   $('#sheetQueue').addEventListener('closed', () => { qUrls.forEach(u => URL.revokeObjectURL(u)); qUrls = []; });
 
 
@@ -1958,10 +2409,19 @@ function bind(){
   $('#seAddr').addEventListener('keydown', e => { if (e.key === 'Enter') searchAddr(); });
   $('#seLat').addEventListener('input', updateMapLink); $('#seLon').addEventListener('input', updateMapLink);
   $('#seSave').addEventListener('click', saveSite);
+  $('#seCustom').addEventListener('change', e => { seCustomOn = e.target.checked; if (seCustomOn) seLay = clone(layoutFor(null)); renderSeLayout(); });
+  $('#seLayLogo').addEventListener('change', e => { seLay.logo = e.target.checked; renderSeLayout(); });
+  $('#seLayPos').addEventListener('change', e => { if (e.target.name === 'seLayPos') { seLay.logoPos = e.target.value; drawSeLayout(); } });
+  $('#seLaySize').addEventListener('input', e => { seLay.logoSize = +e.target.value; $('#seLaySizeOut').textContent = seLay.logoSize + ' %'; drawSeLayout(); });
+  $('#seLayBg').addEventListener('change', e => { seLay.logoBg = e.target.checked; drawSeLayout(); });
+  $('#seLayBand').addEventListener('change', e => { seLay.band = e.target.checked; renderSeLayout(); });
+  $('#seLayLines').addEventListener('click', e => { const b = e.target.closest('[data-line]'); if (!b) return; const k = b.dataset.line; seLay.lines[k] = !seLay.lines[k]; renderSeLayout(); });
+  ['#seName', '#seNumber'].forEach(q => $(q).addEventListener('input', () => drawSeLayout()));
   $('#seDelete').addEventListener('click', () => askDeleteSites([editId]));
 
   /* paramètres : photos */
   $('#setStamp').addEventListener('change', e => { S.stamp = e.target.checked; save(); drawPreview(); });
+  $('#setRotate').addEventListener('change', e => { S.autoRotate = e.target.checked; save(); applyUiRotation(); });
   $('#setTagPrompt').addEventListener('change', e => { S.tagPrompt = e.target.checked; $('#delayField').hidden = !S.tagPrompt; save(); });
   $$('input[name=quality]').forEach(r => r.addEventListener('change', () => { S.quality = r.value; save(); }));
   $$('input[name=tagDelay]').forEach(r => r.addEventListener('change', () => { S.tagDelay = +r.value; save(); }));
