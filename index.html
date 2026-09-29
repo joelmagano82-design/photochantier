@@ -714,6 +714,7 @@ input[type=date]{min-height:42px;padding:6px 10px;border-radius:10px;border:1px 
         <h3>Galerie et carte</h3>
         <ol>
           <li>Dans la visionneuse, <b>glisse le doigt</b> à gauche ou à droite pour passer à la photo suivante. Glisse vers le bas pour fermer, touche la photo pour masquer les boutons.</li>
+          <li><b>Zoom</b> : écarte deux doigts (ou touche deux fois la photo). Photo agrandie : déplace-la avec un doigt ; touche deux fois pour revenir.</li>
           <li>Onglet <b>Carte</b> : les photos sont placées à leur position GPS. Touche une pastille pour voir les photos de cet endroit.</li>
           <li>Filtre par <b>chantier</b> (bandeau des chantiers) et par <b>période</b> (liste des dates). Les filtres valent pour la grille et la carte.</li>
           <li>Fond de carte : plan ou photo aérienne swisstopo, ou OpenStreetMap (bouton en haut à droite de la carte).</li>
@@ -728,7 +729,7 @@ input[type=date]{min-height:42px;padding:6px 10px;border-radius:10px;border:1px 
         <p class="hint">Les photos déjà envoyées vont dans la <b>corbeille du Drive</b> : récupérables pendant 30 jours depuis Google Drive. Les photos en attente sont effacées du téléphone.</p>
         <h3>Confidentialité</h3>
         <p class="muted">Les photos ne vont jamais dans la galerie. Sans réseau, elles attendent dans l'espace privé de l'app, invisible des autres applications, et sont effacées dès qu'elles sont arrivées sur le Drive.</p>
-        <p class="hint mono">PhotoChantier · version 1.0</p>
+        <p class="hint mono">PhotoChantier · version 1.1</p>
       </section>
     </div>
   </div>
@@ -2047,13 +2048,13 @@ function openViewer(item, list){
   viewIdx = viewList.findIndex(x => x.key === item.key);
   if (viewIdx < 0) { viewList = [item]; viewIdx = 0; }
   $('#viewer').classList.remove('chrome-off');
-  showViewerItem();
+  showViewerItem(); applyZoom(); $('#viewerImg').style.opacity = '';
   $('#viewer').hidden = false;
 }
 const bigSrc = it => it.src === 'demo' ? it.url : it.src === 'drive' ? (it.big || blobCache[it.id] || '') : '';
 function showViewerItem(){
   const item = viewList[viewIdx]; if (!item) { closeViewer(); return; }
-  viewItem = item;
+  viewItem = item; resetZoom();
   const img = $('#viewerImg');
   img.onerror = null;
   if (viewUrl) { URL.revokeObjectURL(viewUrl); viewUrl = null; }
@@ -2087,16 +2088,61 @@ function viewerGo(d){
     requestAnimationFrame(() => requestAnimationFrame(() => { st.classList.add('anim'); img.style.transform = ''; img.style.opacity = ''; setTimeout(() => { vAnim = false; }, 210); }));
   }, 180);
 }
-function bindViewer(){
+const zoom = {s:1, x:0, y:0};
+function applyZoom(){ $('#viewerImg').style.transform = (zoom.s === 1 && !zoom.x && !zoom.y) ? '' : `translate(${zoom.x}px, ${zoom.y}px) scale(${zoom.s})`; }
+function resetZoom(){ zoom.s = 1; zoom.x = 0; zoom.y = 0; }
+function clampZoom(){
   const st = $('#viewerStage'), img = $('#viewerImg');
-  let sw = null;
+  const mx = Math.max(0, (img.clientWidth * zoom.s - st.clientWidth) / 2), my = Math.max(0, (img.clientHeight * zoom.s - st.clientHeight) / 2);
+  zoom.x = Math.min(mx, Math.max(-mx, zoom.x)); zoom.y = Math.min(my, Math.max(-my, zoom.y));
+}
+function zoomAt(ns, cx, cy){
+  ns = Math.min(6, Math.max(1, ns)); const k = ns / zoom.s;
+  zoom.x = cx - (cx - zoom.x) * k; zoom.y = cy - (cy - zoom.y) * k; zoom.s = ns;
+  if (ns === 1) { zoom.x = 0; zoom.y = 0; }
+  clampZoom(); applyZoom();
+}
+function bindViewer(){
+  const st = $('#viewerStage'), img = $('#viewerImg'), V = $('#viewer');
+  const pts = new Map();
+  let sw = null, pinch = null, pan = null, tap = null, lastTap = null, tapTimer = 0;
+  const rel = (x, y) => { const r = st.getBoundingClientRect(); return {x:x - r.left - r.width / 2, y:y - r.top - r.height / 2}; };
+  const animReset = () => { st.classList.add('anim'); resetZoom(); applyZoom(); img.style.opacity = ''; };
+  const startPan = (x, y) => { pan = {x0:x, y0:y, tx:zoom.x, ty:zoom.y, moved:false}; };
+  const startPinch = () => {
+    const [a, b] = [...pts.values()];
+    const m = rel((a.x + b.x) / 2, (a.y + b.y) / 2);
+    pinch = {d0:Math.max(10, Math.hypot(a.x - b.x, a.y - b.y)), s0:zoom.s, cx:(m.x - zoom.x) / zoom.s, cy:(m.y - zoom.y) / zoom.s};
+    sw = null; pan = null; tap = null;
+    if (zoom.s === 1) { img.style.transform = ''; img.style.opacity = ''; }
+  };
   st.addEventListener('pointerdown', e => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
-    sw = {x:e.clientX, y:e.clientY, t:performance.now(), dx:0, dy:0, axis:null};
+    pts.set(e.pointerId, {x:e.clientX, y:e.clientY});
     try { st.setPointerCapture(e.pointerId); } catch (err) {}
     st.classList.remove('anim');
+    if (pts.size === 2) { startPinch(); return; }
+    if (pts.size > 2) return;
+    tap = {x:e.clientX, y:e.clientY, t:performance.now()};
+    if (zoom.s > 1) startPan(e.clientX, e.clientY);
+    else sw = {x:e.clientX, y:e.clientY, t:performance.now(), dx:0, dy:0, axis:null};
   });
   st.addEventListener('pointermove', e => {
+    if (!pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if (tap && Math.hypot(e.clientX - tap.x, e.clientY - tap.y) > 10) tap = null;
+    if (pinch && pts.size >= 2) {
+      const [a, b] = [...pts.values()];
+      const m = rel((a.x + b.x) / 2, (a.y + b.y) / 2);
+      const ns = Math.min(6, Math.max(1, pinch.s0 * Math.hypot(a.x - b.x, a.y - b.y) / pinch.d0));
+      zoom.s = ns; zoom.x = m.x - pinch.cx * ns; zoom.y = m.y - pinch.cy * ns;
+      clampZoom(); applyZoom(); return;
+    }
+    if (pan) {
+      zoom.x = pan.tx + e.clientX - pan.x0; zoom.y = pan.ty + e.clientY - pan.y0;
+      if (Math.hypot(e.clientX - pan.x0, e.clientY - pan.y0) > 6) pan.moved = true;
+      clampZoom(); applyZoom(); return;
+    }
     if (!sw || vAnim) return;
     sw.dx = e.clientX - sw.x; sw.dy = e.clientY - sw.y;
     if (!sw.axis && Math.hypot(sw.dx, sw.dy) > 8) sw.axis = Math.abs(sw.dx) > Math.abs(sw.dy) ? 'x' : 'y';
@@ -2107,7 +2153,30 @@ function bindViewer(){
       img.style.transform = `translateY(${sw.dy}px) scale(${Math.max(.85, 1 - sw.dy / 1500)})`; img.style.opacity = String(Math.max(.4, 1 - sw.dy / 400));
     }
   });
+  const onTap = (x, y) => {
+    const now = performance.now();
+    if (lastTap && now - lastTap.t < 320 && Math.hypot(x - lastTap.x, y - lastTap.y) < 40) {
+      clearTimeout(tapTimer); lastTap = null;
+      st.classList.add('anim');
+      if (zoom.s > 1) { resetZoom(); applyZoom(); } else { const r = rel(x, y); zoomAt(2.5, r.x, r.y); }
+      return;
+    }
+    lastTap = {t:now, x, y};
+    clearTimeout(tapTimer); tapTimer = setTimeout(() => { lastTap = null; V.classList.toggle('chrome-off'); }, 320);
+  };
   const end = e => {
+    if (!pts.has(e.pointerId)) return;
+    pts.delete(e.pointerId);
+    if (pinch) {
+      if (pts.size < 2) {
+        pinch = null;
+        if (zoom.s < 1.05) animReset();
+        else if (pts.size === 1) { const r = [...pts.values()][0]; startPan(r.x, r.y); pan.moved = true; }
+      }
+      return;
+    }
+    if (pts.size) return;
+    if (pan) { const moved = pan.moved; pan = null; if (!moved && tap && e.type === 'pointerup') onTap(e.clientX, e.clientY); tap = null; return; }
     if (!sw) return;
     const s0 = sw; sw = null;
     const dt = Math.max(1, performance.now() - s0.t), w = st.clientWidth || 360;
@@ -2118,14 +2187,21 @@ function bindViewer(){
     } else if (s0.axis === 'y') {
       if (s0.dy > 110) { img.style.transform = ''; img.style.opacity = ''; closeViewer(); }
       else { st.classList.add('anim'); img.style.transform = ''; img.style.opacity = ''; }
-    } else if (e.type === 'pointerup') $('#viewer').classList.toggle('chrome-off');
+    } else if (e.type === 'pointerup' && tap) onTap(e.clientX, e.clientY);
+    tap = null;
   };
   st.addEventListener('pointerup', end); st.addEventListener('pointercancel', end);
+  st.addEventListener('wheel', e => {
+    e.preventDefault(); st.classList.remove('anim');
+    const r = rel(e.clientX, e.clientY); zoomAt(zoom.s * Math.exp(-e.deltaY * .0025), r.x, r.y);
+  }, {passive:false});
   $('#viewerPrev').addEventListener('click', () => viewerGo(-1));
   $('#viewerNext').addEventListener('click', () => viewerGo(1));
   document.addEventListener('keydown', e => {
     if ($('#viewer').hidden || stack.length) return;
     if (e.key === 'ArrowLeft') viewerGo(-1); else if (e.key === 'ArrowRight') viewerGo(1);
+    else if (e.key === '+' || e.key === '=') { st.classList.add('anim'); zoomAt(zoom.s * 1.5, 0, 0); }
+    else if (e.key === '-') { st.classList.add('anim'); zoomAt(zoom.s / 1.5, 0, 0); }
   });
 }
 
