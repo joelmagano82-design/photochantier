@@ -512,6 +512,9 @@ input[type=date]{min-height:42px;padding:6px 10px;border-radius:10px;border:1px 
   .de-fields>*{flex:1 1 44%!important;max-width:none!important}
   #deTitle{flex-basis:100%!important}
 }
+.sync-row .btn{min-height:40px;padding:0 14px;flex:none}
+#syncStatus.ok{color:var(--ok)}
+#syncStatus.err{color:var(--bad)}
 </style>
 </head>
 <body>
@@ -876,6 +879,7 @@ input[type=date]{min-height:42px;padding:6px 10px;border-radius:10px;border:1px 
         <div id="driveStatus" class="status"><span class="dot"></span><div><b id="driveStatusT">Non connecté</b><small id="driveStatusS">Les photos restent en attente dans l'app</small></div></div>
         <label class="field"><span>1. Colle ici ton Client ID Google (étape 7 du guide)</span><div class="copy"><input type="text" id="setClientId" class="mono" placeholder="123456-abc.apps.googleusercontent.com" autocomplete="off" spellcheck="false" inputmode="text"><button id="pasteCid" class="btn">Coller</button></div></label>
         <div class="btn-row"><button id="driveConnect" class="btn primary">Connecter un compte Google</button><button id="driveDisconnect" class="btn" hidden>Déconnecter</button></div>
+        <div class="row sync-row"><div class="lbl"><b>Téléphone et tablette synchronisés</b><small id="syncStatus"></small></div><button id="syncNow" class="btn">Synchroniser</button></div>
         <div class="field"><span>Dossier de destination</span>
           <div class="copy"><input type="text" id="rootShow" readonly placeholder="Aucun dossier choisi"><button id="rootPick" class="btn">Choisir</button></div>
         </div>
@@ -886,7 +890,7 @@ input[type=date]{min-height:42px;padding:6px 10px;border-radius:10px;border:1px 
 
       <section class="group" id="g-sites">
         <h2>Chantiers</h2>
-        <p class="hint">Une photo prise dans le rayon d'un chantier est rangée dans son dossier. Hors de tout rayon, elle va dans « À classer ».</p>
+        <p class="hint">Une photo prise dans le rayon d'un chantier est rangée dans son dossier. Hors de tout rayon, elle va dans « À classer ». Les chantiers sont partagés entre le téléphone et la tablette (même compte Google, même dossier Drive).</p>
         <button id="siteDelExamples" class="btn block danger" hidden></button>
         <div id="siteList" class="list"></div>
         <button id="siteAdd" class="btn block"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Ajouter un chantier</button>
@@ -985,9 +989,17 @@ input[type=date]{min-height:42px;padding:6px 10px;border-radius:10px;border:1px 
           <li>Touche un document pour le voir, le <b>modifier</b>, le <b>partager en PDF</b> (WhatsApp, e-mail…) ou le supprimer.</li>
         </ol>
         <p class="muted">Mise en page : Paramètres › Documents (par défaut) ou fiche du chantier (propre au chantier).</p>
+        <h3>Téléphone et tablette</h3>
+        <ol>
+          <li>Sur les deux appareils : <b>même compte Google</b> et <b>même dossier Drive</b> (Paramètres › Google Drive).</li>
+          <li>Les <b>chantiers</b> (logo, position, rayon, mises en page), les <b>étiquettes</b>, la <b>bibliothèque de logos</b> et les réglages des photos et des documents sont alors partagés.</li>
+          <li>Un changement part vers le Drive en quelques secondes ; l'autre appareil le reçoit à l'ouverture de l'app ou dans la minute. Bouton <b>Synchroniser</b> pour forcer.</li>
+          <li>Un chantier créé sur les deux appareils avec le même n° (ou le même nom) est fusionné : ses photos et documents sont regroupés.</li>
+        </ol>
+        <p class="hint">Les réglages propres à l'appareil restent séparés : écran de départ, rotation automatique, compte et dossier Drive. Ne supprime pas le fichier « Réglages PhotoChantier » du Drive.</p>
         <h3>Confidentialité</h3>
         <p class="muted">Les photos ne vont jamais dans la galerie. Sans réseau, elles attendent dans l'espace privé de l'app, invisible des autres applications, et sont effacées dès qu'elles sont arrivées sur le Drive.</p>
-        <p class="hint mono">PhotoChantier · version 1.3 bêta</p>
+        <p class="hint mono">PhotoChantier · version 1.4 bêta</p>
       </section>
     </div>
   </div>
@@ -1042,7 +1054,205 @@ const PRESET_LOGOS = [
 ];
 if (S.logo) { S.logoLib = [S.logo].concat(S.logoLib || []); } delete S.logo; delete S.company; delete S.logoOnPhoto;
 S.logoLib = S.logoLib || [];
-function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+function save(){
+  const ch = stampChanges(); if (ch) S.syncDirty = true;
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
+  if (ch || (S.drive.rootId && S.drive.token && S.drive.rootId !== S.syncRoot)) scheduleSync();
+}
+/* ---------- Synchronisation des chantiers et réglages entre appareils (v1.4) ---------- */
+const SYNC_FIELDS = ['tags', 'logoLib', 'docLay', 'docTitles', 'stamp', 'logoPos', 'logoSize', 'logoBg', 'quality', 'tagPrompt', 'tagDelay', 'structure'];
+const SYNC_NAME = 'Réglages PhotoChantier (ne pas supprimer).json';
+S.smod = S.smod || {}; S.sdel = S.sdel || {}; S.fmod = S.fmod || {}; S.remap = S.remap || {}; S.migrate = S.migrate || {};
+for (const s of S.sites) if (!s.example && !S.smod[s.id]) S.smod[s.id] = 1;
+for (const k of SYNC_FIELDS) if (S.fmod[k] == null && JSON.stringify(S[k] ?? null) !== JSON.stringify(DEF[k] ?? null)) S.fmod[k] = 1;
+function syncSnapNow(){
+  const o = {f:{}, s:{}};
+  for (const k of SYNC_FIELDS) o.f[k] = JSON.stringify(S[k] ?? null);
+  for (const s of S.sites) if (!s.example) o.s[s.id] = JSON.stringify(s);
+  return o;
+}
+let syncSnap = syncSnapNow();
+function stampChanges(){
+  const now = Date.now(), cur = syncSnapNow(); let ch = false;
+  for (const k of SYNC_FIELDS) if (cur.f[k] !== syncSnap.f[k]) { S.fmod[k] = now; ch = true; }
+  for (const id in cur.s) if (cur.s[id] !== syncSnap.s[id]) { S.smod[id] = now; delete S.sdel[id]; ch = true; }
+  for (const id in syncSnap.s) if (!(id in cur.s) && !S.remapping) { S.sdel[id] = now; delete S.smod[id]; ch = true; }
+  syncSnap = cur;
+  return ch;
+}
+function saveRaw(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+const SYNC = {busy:false, last:0, err:'', timer:0, again:false};
+function scheduleSync(ms = 2500){ clearTimeout(SYNC.timer); SYNC.timer = setTimeout(() => syncSettings(), ms); }
+const remapId = id => { let n = 0; while (id && S.remap[id] && n++ < 10) id = S.remap[id]; return id; };
+function syncPayload(){
+  const sites = S.sites.filter(s => !s.example), smod = {};
+  sites.forEach(s => smod[s.id] = S.smod[s.id] || 1);
+  const fields = {}, fmod = {};
+  for (const k of SYNC_FIELDS) { fields[k] = S[k] ?? null; fmod[k] = S.fmod[k] || 0; }
+  return {v:1, sites, smod, sdel:S.sdel, fields, fmod};
+}
+const sameSite = (a, b) => {
+  const n = x => String(x || '').trim().toLowerCase();
+  return n(a.number) && n(b.number) ? n(a.number) === n(b.number) : n(a.name) === n(b.name);
+};
+function applyRemap(map){
+  S.remapping = true;
+  for (const s of S.sites) if (map[s.id]) { const nw = map[s.id]; S.smod[nw] = Math.max(S.smod[nw] || 0, S.smod[s.id] || 1); delete S.smod[s.id]; s.id = nw; }
+  for (const old in map) { S.remap[old] = map[old]; S.migrate[old] = map[old]; }
+  if (map[manualSite]) manualSite = map[manualSite];
+  if (map[desk.site]) desk.site = map[desk.site];
+  if (map[gal.site]) gal.site = map[gal.site];
+  syncSnap = syncSnapNow();
+  delete S.remapping;
+}
+function mergeRemote(R){
+  const rSites = Array.isArray(R.sites) ? R.sites : [], rsmod = R.smod || {}, rsdel = R.sdel || {}, rf = R.fields || {}, rfm = R.fmod || {};
+  const before = JSON.stringify({s:S.sites, f:SYNC_FIELDS.map(k => S[k])});
+  /* même chantier créé sur deux appareils : on garde l'identifiant du Drive */
+  const map = {}, rIds = new Set(rSites.map(s => s.id));
+  for (const rs of rSites) {
+    if (S.sites.some(s => s.id === rs.id)) continue;
+    const dup = S.sites.find(ls => !ls.example && !rIds.has(ls.id) && !Object.values(map).includes(rs.id) && !map[ls.id] && sameSite(ls, rs));
+    if (dup) map[dup.id] = rs.id;
+  }
+  if (Object.keys(map).length) applyRemap(map);
+  /* chantiers */
+  const local = new Map(S.sites.filter(s => !s.example).map(s => [s.id, s])), remote = new Map(rSites.map(s => [s.id, s]));
+  const ids = [...new Set([...S.sites.filter(s => !s.example).map(s => s.id), ...rSites.map(s => s.id), ...Object.keys(rsdel), ...Object.keys(S.sdel)])];
+  const keep = new Map(), smod = {}, sdel = {...S.sdel};
+  for (const id of ids) {
+    const L = local.get(id), Rr = remote.get(id);
+    const lt = L ? (S.smod[id] || 1) : 0, rt = Rr ? (rsmod[id] || 1) : 0, dt = Math.max(S.sdel[id] || 0, rsdel[id] || 0);
+    let best = null, bt = 0;
+    if (Rr && rt >= lt) { best = Rr; bt = rt; } else if (L) { best = L; bt = lt; }
+    if (dt && dt >= bt) { sdel[id] = dt; continue; }
+    delete sdel[id];
+    if (best) { keep.set(id, best); smod[id] = bt; }
+  }
+  const order = [...S.sites.filter(s => s.example || keep.has(s.id)).map(s => s.id), ...rSites.map(s => s.id).filter(id => keep.has(id) && !local.has(id))];
+  let sites = order.map(id => S.sites.find(s => s.example && s.id === id) || keep.get(id));
+  const real = sites.filter(s => !s.example).length;
+  if (!S.syncInit && real) sites = sites.filter(s => !s.example);
+  S.sites = sites.map(s => clone(s)); S.smod = smod; S.sdel = sdel;
+  /* réglages communs */
+  for (const k of SYNC_FIELDS) {
+    const lt = S.fmod[k] || 0, rt = rfm[k] || 0;
+    if (k in rf && rt >= lt && rf[k] != null) { S[k] = clone(rf[k]); S.fmod[k] = rt; }
+  }
+  if (manualSite && manualSite !== '__none' && !S.sites.some(s => s.id === manualSite)) manualSite = null;
+  syncSnap = syncSnapNow();
+  return before !== JSON.stringify({s:S.sites, f:SYNC_FIELDS.map(k => S[k])});
+}
+async function findSyncFile(){
+  const q = `'${qEsc(S.drive.rootId)}' in parents and trashed=false and appProperties has { key='kind' and value='settings' }`;
+  const r = await api('https://www.googleapis.com/drive/v3/files?' + new URLSearchParams({q, orderBy:'modifiedTime desc', pageSize:'5', fields:'files(id,modifiedTime)'}));
+  return (r.files || [])[0] || null;
+}
+async function downloadJson(id){
+  const r = await api(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(id)}?alt=media`);
+  return r && typeof r.json === 'function' ? await r.json() : r;
+}
+async function syncSettings(force){
+  if (SYNC.busy) { SYNC.again = true; return; }
+  if (!driveReady() || !navigator.onLine) { renderSyncStatus(); return; }
+  SYNC.busy = true; SYNC.err = ''; renderSyncStatus();
+  let changed = false, received = 0;
+  try {
+    if (S.syncRoot !== S.drive.rootId) { S.syncFile = ''; S.syncMod = ''; S.syncInit = false; S.syncRoot = S.drive.rootId; }
+    let meta = null;
+    if (S.syncFile) {
+      try { meta = await api(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(S.syncFile)}?fields=id,modifiedTime,trashed`); if (meta.trashed) meta = null; }
+      catch (e) { if (e.status !== 404) throw e; meta = null; }
+    }
+    if (!meta) { meta = await findSyncFile(); S.syncFile = meta ? meta.id : ''; }
+    if (!meta || force || meta.modifiedTime !== S.syncMod || S.syncDirty || !S.syncInit) {
+      let R = null;
+      if (meta) R = await downloadJson(meta.id);
+      if (R && R.v === 1) {
+        const had = new Set(S.sites.map(s => s.id));
+        changed = mergeRemote(R);
+        received = S.sites.filter(s => !had.has(s.id)).length;
+      }
+      const P = syncPayload(), body = JSON.stringify(P);
+      const need = !R || JSON.stringify({v:1, sites:R.sites, smod:R.smod, sdel:R.sdel, fields:R.fields, fmod:R.fmod}) !== body;
+      let mod = meta ? meta.modifiedTime : '';
+      if (need) {
+        if (S.syncFile) {
+          const r = await api(`https://www.googleapis.com/upload/drive/v3/files/${encodeURIComponent(S.syncFile)}?uploadType=media&fields=id,modifiedTime`, {method:'PATCH', headers:{'Content-Type':'application/json'}, body});
+          mod = r.modifiedTime || '';
+        } else {
+          const md = {name:SYNC_NAME, parents:[S.drive.rootId], mimeType:'application/json', description:'Chantiers, logos, étiquettes et mises en page partagés entre le téléphone et la tablette.', appProperties:{pc:'1', kind:'settings'}};
+          const r = await driveMultipart('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,modifiedTime', 'POST', md, new Blob([body], {type:'application/json'}), 'application/json');
+          S.syncFile = r.id; mod = r.modifiedTime || '';
+        }
+      }
+      S.syncMod = mod; S.syncDirty = false;
+      const first = !S.syncInit; S.syncInit = true;
+      saveRaw();
+      if (changed) refreshAfterSync();
+      if (first && received) note(`Chantiers synchronisés : ${received} reçu${received > 1 ? 's' : ''} du Drive`, 3500);
+    }
+    SYNC.last = Date.now();
+  } catch (e) { SYNC.err = e.message || 'erreur'; }
+  finally {
+    SYNC.busy = false; renderSyncStatus();
+    if (SYNC.again) { SYNC.again = false; scheduleSync(500); }
+  }
+  runMigrations();
+}
+function refreshAfterSync(){
+  renderSiteChip();
+  if (!$('#settings').hidden) { renderSites(); renderTagList(); drawPreview(); renderDocSettings(); if (!$('#structOpts').contains(document.activeElement)) $$('input[name=struct]').forEach(r => r.checked = r.value === S.structure); }
+  if (!$('#desk').hidden) { if (desk.site && desk.site !== '__none' && !siteById(desk.site)) desk.site = null; if (!desk.site) { const c = currentSite(); desk.site = c ? c.id : (S.sites[0]?.id || '__none'); } renderDeskHead(); renderDeskSites(); loadDocs(); }
+  if (!$('#gallery').hidden) renderGalSites();
+  if (!$('#sheetSite').hidden) renderSitePick();
+}
+function renderSyncStatus(){
+  const el = $('#syncStatus'); if (!el) return;
+  const ago = t => { const m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'à l’instant' : m < 60 ? `il y a ${m} min` : `il y a ${Math.round(m / 60)} h`; };
+  let t, cls = '';
+  if (!S.drive.email) t = 'Connecte Google Drive pour partager les chantiers entre le téléphone et la tablette.';
+  else if (!S.drive.rootId) t = 'Choisis le dossier Drive (le même sur les deux appareils).';
+  else if (SYNC.busy) t = 'Synchronisation…';
+  else if (SYNC.err) { t = 'Échec : ' + SYNC.err; cls = 'err'; }
+  else if (!navigator.onLine) t = 'Hors ligne · les changements partiront au retour du réseau';
+  else if (!tokenValid()) t = 'Session Google expirée · reconnecte-toi';
+  else if (SYNC.last) { t = 'À jour · ' + ago(SYNC.last) + (S.syncDirty ? ' · changements en attente' : ''); cls = 'ok'; }
+  else t = S.syncDirty ? 'Changements en attente d’envoi' : 'En attente de synchronisation';
+  el.textContent = t; el.className = cls;
+  const b = $('#syncNow'); if (b) b.disabled = SYNC.busy || !driveReady();
+}
+const MIG = {busy:false};
+async function runMigrations(){
+  const m = S.migrate || {}, olds = Object.keys(m);
+  if (!olds.length || MIG.busy) return;
+  MIG.busy = true;
+  try {
+    for (const it of await DB.all()) { const n = m[it.meta.siteId]; if (n) { it.meta.siteId = n; await DB.put(it); } }
+    for (const r of await DOCSTORE.all()) {
+      const n = r.doc && m[r.doc.siteId]; if (!n) continue;
+      r.doc.siteId = n;
+      if (r.uid !== '__draft' && !r.demo) { r.dirty = true; r.saved = Date.now(); await DOCSTORE.put(r); await enqueueDoc(r); } else await DOCSTORE.put(r);
+    }
+    if (!driveReady() || !navigator.onLine) return;
+    let n = 0;
+    for (const old of olds) {
+      let token = null;
+      do {
+        const q = `trashed=false and appProperties has { key='site' and value='${qEsc(old)}' }`;
+        const p = {q, pageSize:'100', fields:'nextPageToken,files(id)'}; if (token) p.pageToken = token;
+        const r = await api('https://www.googleapis.com/drive/v3/files?' + new URLSearchParams(p));
+        for (const f of r.files || []) { await api(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(f.id)}?fields=id`, {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({appProperties:{site:m[old]}})}); n++; }
+        token = r.nextPageToken || null;
+      } while (token);
+      delete S.migrate[old]; saveRaw();
+    }
+    if (n) { note(`Chantiers fusionnés · ${n} fichier${n > 1 ? 's' : ''} du Drive mis à jour`, 3500); if (!$('#gallery').hidden) refreshView(); if (!$('#desk').hidden) loadDocs(); }
+    processQueue();
+  } catch (e) {}
+  finally { MIG.busy = false; }
+}
+
 
 /* ---------- Stockage privé de la file (IndexedDB) ---------- */
 const DB = {
@@ -1173,7 +1383,7 @@ function stopCamera(){
   stream = null; track = null; imageCapture = null; torchOn = false; $('#btnTorch').classList.remove('on');
 }
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { stopCamera(); } else { if ($('#desk').hidden) startCamera(); processQueue(); refreshInboxBadge(); }
+  if (document.hidden) { stopCamera(); } else { if ($('#desk').hidden) startCamera(); processQueue(); refreshInboxBadge(); syncSettings(); }
 });
 
 async function grabFrame(){
@@ -1633,7 +1843,7 @@ function renderSettings(){
   $('#setClientId').value = S.drive.clientId;
   $('#structOpts').innerHTML = Object.entries(STRUCT).map(([k, v]) => `<label class="opt"><input type="radio" name="struct" value="${k}" ${S.structure === k ? 'checked' : ''}><div><b>${v.t}</b><code>${v.ex}2026-09-27_14h32_GACO_armature.jpg</code></div></label>`).join('');
   $('#redirUri').value = IN_FRAME ? 'Visible une fois l’app en ligne (ex. https://tonnom.github.io/photochantier/)' : redirectUri();
-  renderDrive(); renderSites(); renderTagList(); drawPreview(); renderDocSettings();
+  renderDrive(); renderSites(); renderTagList(); drawPreview(); renderDocSettings(); renderSyncStatus();
 }
 function renderDrive(){
   const ok = tokenValid(), st = $('#driveStatus');
@@ -2018,7 +2228,7 @@ function localItem(it){
 function driveItem(f){
   const ap = f.appProperties || {};
   return {key:'d' + f.id, src:'drive', id:f.id, name:f.name, time:new Date(ap.taken || f.createdTime),
-    tags:ap.tags ? ap.tags.split('|').filter(Boolean) : [], siteId:ap.site || 'none',
+    tags:ap.tags ? ap.tags.split('|').filter(Boolean) : [], siteId:remapId(ap.site) || 'none',
     thumb:f.thumbnailLink ? f.thumbnailLink.replace(/=s\d+$/, '=s400') : '', big:f.thumbnailLink ? f.thumbnailLink.replace(/=s\d+$/, '=s2000') : '', link:f.webViewLink || '',
     pos:ap.lat && ap.lon ? {lat:+ap.lat, lon:+ap.lon} : parseGps(f.description)};
 }
@@ -2039,9 +2249,14 @@ function rangeBounds(){
 }
 function inRange(t){ const r = rangeBounds(); return (!r.from || t >= r.from) && (!r.to || t <= r.to); }
 function galVisibleList(){ return gal.items.filter(i => (!gal.tag || i.tags.includes(gal.tag)) && inRange(i.time)).sort((a, b) => b.time - a.time); }
+function siteClause(id){
+  const ids = [id, ...Object.keys(S.remap || {}).filter(o => remapId(o) === id)];
+  const c = ids.map(x => `appProperties has { key='site' and value='${qEsc(x)}' }`);
+  return c.length > 1 ? '(' + c.join(' or ') + ')' : c[0];
+}
 function driveQuery(){
   let q = "trashed=false and mimeType='image/jpeg' and appProperties has { key='pc' and value='1' }";
-  if (gal.site !== '__all') q += ` and appProperties has { key='site' and value='${qEsc(gal.site === '__none' ? 'none' : gal.site)}' }`;
+  if (gal.site !== '__all') q += ' and ' + siteClause(gal.site === '__none' ? 'none' : gal.site);
   const r = rangeBounds(); if (r.from) q += ` and createdTime >= '${r.from.toISOString()}'`;
   return q;
 }
@@ -2894,7 +3109,7 @@ function recItem(r){
 function driveDocItem(f){
   const ap = f.appProperties || {};
   return {key:'u' + (ap.uid || f.id), uid:ap.uid || '', src:'drive', title:ap.title || f.name, dtype:DOCS[ap.dtype] ? ap.dtype : 'libre',
-    date:(ap.taken || f.createdTime || '').slice(0, 10), siteId:ap.site || 'none', thumb:f.thumbnailLink ? f.thumbnailLink.replace(/=s\d+$/, '=s400') : '',
+    date:(ap.taken || f.createdTime || '').slice(0, 10), siteId:remapId(ap.site) || 'none', thumb:f.thumbnailLink ? f.thumbnailLink.replace(/=s\d+$/, '=s400') : '',
     pages:0, driveId:f.id, modified:f.modifiedTime || ''};
 }
 async function seedDemo(){
@@ -2935,7 +3150,7 @@ async function loadDocs(){
     else if (!navigator.onLine) desk.err = 'Hors ligne · documents de cet appareil seulement';
     else {
       try {
-        const q = `trashed=false and mimeType='application/json' and appProperties has { key='kind' and value='doc' } and appProperties has { key='site' and value='${qEsc(sid)}' }`;
+        const q = `trashed=false and mimeType='application/json' and appProperties has { key='kind' and value='doc' } and ${siteClause(sid)}`;
         const res = await api('https://www.googleapis.com/drive/v3/files?' + new URLSearchParams({q, orderBy:'modifiedTime desc', pageSize:'300', fields:'files(id,name,thumbnailLink,modifiedTime,createdTime,appProperties)'}));
         const known = new Map(recs.map(r => [r.uid, r]));
         for (const f of res.files || []) {
@@ -2977,6 +3192,7 @@ async function getDocRec(it){
   const doc = res && typeof res.json === 'function' ? await res.json() : res;
   if (!doc || !doc.pages) throw new Error('fichier illisible');
   doc.uid = doc.uid || it.uid || newUid();
+  if (doc.siteId !== 'none') doc.siteId = remapId(doc.siteId);
   rec = {uid:doc.uid, doc, driveId:it.driveId, dirty:false, saved:Date.now(), modified:it.modified || new Date().toISOString(), thumb:it.thumb || ''};
   rec.thumb = await docThumb(doc);
   await DOCSTORE.put(rec);
@@ -3063,7 +3279,7 @@ function askDeleteDoc(it){
 /* ---------- Éditeur manuscrit ---------- */
 const ed = {pages:[], imgs:[], doc:null, uid:null, isNew:true, tool:'pen', color:'#1d2733', size:2.8, undo:[], redo:[], penSeen:false, canvases:[], sel:null, dirty:false};
 const BGN = {plain:'Blanc', lined:'Ligné', grid:'Quadrillé'};
-if (location.hostname === 'localhost') window.__ed = ed;
+if (location.hostname === 'localhost') { window.__ed = ed; window.__sync = syncSettings; window.__S = () => S; }
 const IMG_EL = {};
 function imgEl(im){
   let el = IMG_EL[im.id];
@@ -3400,7 +3616,7 @@ function bindDocs(){
   $('#dkPhoto').addEventListener('click', closeDesk);
   $('#dkSettings').addEventListener('click', () => openSettings());
   $('#dkGps').addEventListener('click', () => { const c = currentSite(); desk.site = c ? c.id : '__none'; renderDeskSites(); loadDocs(); });
-  $('#dkRefresh').addEventListener('click', loadDocs);
+  $('#dkRefresh').addEventListener('click', () => { syncSettings(true); loadDocs(); });
   $('#dkSites').addEventListener('click', e => { const b = e.target.closest('[data-dsite]'); if (!b) return; desk.site = b.dataset.dsite; renderDeskSites(); loadDocs(); $('#dkMain').scrollTop = 0; });
   $('#desk').addEventListener('click', e => {
     if (e.target.closest('#dkNew')) { openKindPick(); return; }
@@ -3544,7 +3760,7 @@ function bind(){
   $('#driveDisconnect').addEventListener('click', () => {
     const t = S.drive.token;
     if (t) fetch('https://oauth2.googleapis.com/revoke?token=' + encodeURIComponent(t), {method:'POST'}).catch(() => {});
-    Object.assign(S.drive, {token:'', exp:0, email:'', rootId:'', rootName:'', folderCache:{}}); save(); renderDrive(); renderBanner(); note('Compte Google déconnecté');
+    Object.assign(S.drive, {token:'', exp:0, email:'', rootId:'', rootName:'', folderCache:{}}); S.syncRoot = ''; save(); renderSyncStatus(); renderDrive(); renderBanner(); note('Compte Google déconnecté');
   });
   $('#rootPick').addEventListener('click', openFolderPicker);
   $('#structOpts').addEventListener('change', e => { if (e.target.name === 'struct') { S.structure = e.target.value; save(); } });
@@ -3614,7 +3830,8 @@ function bind(){
     document.getElementById(a.getAttribute('href').slice(1))?.scrollIntoView({block:'start', behavior:'smooth'});
   });
 
-  window.addEventListener('online', () => { renderBanner(); processQueue(); });
+  window.addEventListener('online', () => { renderBanner(); processQueue(); syncSettings(); });
+  $('#syncNow').addEventListener('click', () => syncSettings(true));
   window.addEventListener('offline', renderBanner);
 }
 function applyBrand(){}
@@ -3637,6 +3854,8 @@ async function init(){
   await refreshQueue();
   processQueue();
   setInterval(processQueue, 20000);
+  syncSettings();
+  setInterval(() => { if (!document.hidden) syncSettings(); else renderSyncStatus(); }, 60000);
   if (shareParam === 'err') note('Réception des photos impossible. Réessaie depuis l’autre application.', 4500);
   if (await refreshInboxBadge()) openImport();
   else if (shareParam === '0') note('Aucune photo reçue.', 3000);
