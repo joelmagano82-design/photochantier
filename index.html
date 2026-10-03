@@ -515,6 +515,27 @@ input[type=date]{min-height:42px;padding:6px 10px;border-radius:10px;border:1px 
 .sync-row .btn{min-height:40px;padding:0 14px;flex:none}
 #syncStatus.ok{color:var(--ok)}
 #syncStatus.err{color:var(--bad)}
+
+/* ---------- Thème clair (v1.5) : écrans de travail ; la caméra et la visionneuse photo restent sombres ---------- */
+html[data-theme="light"] :is(.panel,.sheet,.de){
+  --asphalt:#f2f0eb;--surface:#ffffff;--surface2:#e9e6df;--line:#d2cec5;
+  --text:#1b1d21;--muted:#5b6169;--signal-soft:#fbefc4;
+  --ok:#1d7f4b;--warn:#a35800;--bad:#c62f2a;
+  color-scheme:light;color:var(--text)}
+html[data-theme="light"] :is(.group h2,.imp-label,.dk-label,.opt code,.crumbs button,.gsite.on,.pill,.qstat,.de-tool.on,.panel .brand span b){color:#8a6200}
+html[data-theme="light"] :is(.opt:has(input:checked),.pick.cur,.gsite.on){background:var(--signal-soft)}
+html[data-theme="light"] .qstat.err{background:#fbe1df;color:var(--bad)}
+html[data-theme="light"] .qstat.ok{background:#dcf2e5;color:var(--ok)}
+html[data-theme="light"] :is(.switch span,.sheet::before){background:#c4c0b7}
+html[data-theme="light"] .logo-box{border-color:#b9b4aa;background:conic-gradient(#ece9e2 25%,#f7f5f0 0 50%,#ece9e2 0 75%,#f7f5f0 0) 0 0/16px 16px}
+html[data-theme="light"] :is(.tile,.ms-list button,.qrow img,.dp-tile){background:#e3e0d9}
+html[data-theme="light"] .site-del:active{background:#fbe1df}
+html[data-theme="light"] .chip.rm i{background:rgba(0,0,0,.06)}
+html[data-theme="light"] .dk-card:hover{border-color:#a9a49a}
+html[data-theme="light"] .de{background:#e4e1da}
+html[data-theme="light"] :is(.de-page canvas,.dv-pages img,.de-imgbar){box-shadow:0 4px 18px rgba(0,0,0,.16)}
+html[data-theme="light"] .note{background:#1c1f23;color:#f4f2ea}
+html[data-theme="light"] .scrim{background:rgba(20,22,26,.42)}
 </style>
 </head>
 <body>
@@ -871,8 +892,16 @@ input[type=date]{min-height:42px;padding:6px 10px;border-radius:10px;border:1px 
   <div class="panel-body" id="setScroll">
     <div class="panel-inner">
       <nav class="jump" aria-label="Sections">
-        <a href="#g-drive">Google Drive</a><a href="#g-sites">Chantiers</a><a href="#g-photos">Photos</a><a href="#g-docs">Documents</a><a href="#g-tags">Étiquettes</a><a href="#g-help">Aide</a>
+        <a href="#g-look">Affichage</a><a href="#g-drive">Google Drive</a><a href="#g-sites">Chantiers</a><a href="#g-photos">Photos</a><a href="#g-docs">Documents</a><a href="#g-tags">Étiquettes</a><a href="#g-help">Aide</a>
       </nav>
+
+      <section class="group" id="g-look">
+        <h2>Affichage</h2>
+        <div class="field"><span>Couleurs de l'app</span>
+          <div class="seg" id="themeSeg"><label><input type="radio" name="theme" value="dark"><span>Sombre</span></label><label><input type="radio" name="theme" value="light"><span>Clair</span></label><label><input type="radio" name="theme" value="auto"><span>Comme l'appareil</span></label></div>
+          <p class="hint">Clair : paramètres, galerie, documents et éditeur sur fond clair. La caméra et la visionneuse photo restent sombres. Réglage propre à cet appareil.</p>
+        </div>
+      </section>
 
       <section class="group" id="g-drive">
         <h2>Google Drive</h2>
@@ -997,9 +1026,11 @@ input[type=date]{min-height:42px;padding:6px 10px;border-radius:10px;border:1px 
           <li>Un chantier créé sur les deux appareils avec le même n° (ou le même nom) est fusionné : ses photos et documents sont regroupés.</li>
         </ol>
         <p class="hint">Les réglages propres à l'appareil restent séparés : écran de départ, rotation automatique, compte et dossier Drive. Ne supprime pas le fichier « Réglages PhotoChantier » du Drive.</p>
+        <h3>Affichage clair ou sombre</h3>
+        <p class="muted">Paramètres › Affichage : Sombre, Clair ou Comme l'appareil (suit le réglage d'Android). Chaque appareil garde son propre choix.</p>
         <h3>Confidentialité</h3>
         <p class="muted">Les photos ne vont jamais dans la galerie. Sans réseau, elles attendent dans l'espace privé de l'app, invisible des autres applications, et sont effacées dès qu'elles sont arrivées sur le Drive.</p>
-        <p class="hint mono">PhotoChantier · version 1.4 bêta</p>
+        <p class="hint mono">PhotoChantier · version 1.5 bêta</p>
       </section>
     </div>
   </div>
@@ -1022,7 +1053,7 @@ const ICON_FOLDER = '<svg class="ic" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1
 const KEY = 'photochantier.v1';
 const DEF = {
   v: 1, logoPos: 'tr', logoSize: 18, logoBg: false, logoLib: [],
-  stamp: true, quality: 'standard', tagPrompt: true, tagDelay: 5, structure: 'A', autoRotate: true, mapLayer: 'Plan CH', home: 'auto', docTitles: {},
+  stamp: true, quality: 'standard', tagPrompt: true, tagDelay: 5, structure: 'A', autoRotate: true, mapLayer: 'Plan CH', home: 'auto', docTitles: {}, theme: 'dark',
   tags: ['fouille','réseau EU','réseau EC','coffrage','armature','bétonnage','remblayage','enrobé','bordures','défaut','avant','après'],
   sites: [
     {id:'ex1', number:'000001', name:'Exemple Saillon', lat:46.17170, lon:7.18830, radius:300, example:true},
@@ -1223,6 +1254,14 @@ function renderSyncStatus(){
   const b = $('#syncNow'); if (b) b.disabled = SYNC.busy || !driveReady();
 }
 const MIG = {busy:false};
+/* thème de l'app (propre à chaque appareil) */
+const LIGHT_MQ = window.matchMedia ? matchMedia('(prefers-color-scheme: light)') : null;
+function applyTheme(){
+  const t = S.theme === 'auto' ? (LIGHT_MQ && LIGHT_MQ.matches ? 'light' : 'dark') : (S.theme === 'light' ? 'light' : 'dark');
+  document.documentElement.dataset.theme = t;
+}
+applyTheme();
+LIGHT_MQ?.addEventListener?.('change', () => { if (S.theme === 'auto') applyTheme(); });
 async function runMigrations(){
   const m = S.migrate || {}, olds = Object.keys(m);
   if (!olds.length || MIG.busy) return;
@@ -1844,6 +1883,7 @@ function renderSettings(){
   $('#structOpts').innerHTML = Object.entries(STRUCT).map(([k, v]) => `<label class="opt"><input type="radio" name="struct" value="${k}" ${S.structure === k ? 'checked' : ''}><div><b>${v.t}</b><code>${v.ex}2026-09-27_14h32_GACO_armature.jpg</code></div></label>`).join('');
   $('#redirUri').value = IN_FRAME ? 'Visible une fois l’app en ligne (ex. https://tonnom.github.io/photochantier/)' : redirectUri();
   renderDrive(); renderSites(); renderTagList(); drawPreview(); renderDocSettings(); renderSyncStatus();
+  $$('input[name=theme]').forEach(r => r.checked = r.value === (S.theme || 'dark'));
 }
 function renderDrive(){
   const ok = tokenValid(), st = $('#driveStatus');
@@ -3832,6 +3872,7 @@ function bind(){
 
   window.addEventListener('online', () => { renderBanner(); processQueue(); syncSettings(); });
   $('#syncNow').addEventListener('click', () => syncSettings(true));
+  $$('input[name=theme]').forEach(r => r.addEventListener('change', () => { S.theme = r.value; save(); applyTheme(); }));
   window.addEventListener('offline', renderBanner);
 }
 function applyBrand(){}
