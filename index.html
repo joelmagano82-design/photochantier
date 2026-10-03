@@ -1026,11 +1026,13 @@ html[data-theme="light"] .scrim{background:rgba(20,22,26,.42)}
           <li>Un chantier créé sur les deux appareils avec le même n° (ou le même nom) est fusionné : ses photos et documents sont regroupés.</li>
         </ol>
         <p class="hint">Les réglages propres à l'appareil restent séparés : écran de départ, rotation automatique, compte et dossier Drive. Ne supprime pas le fichier « Réglages PhotoChantier » du Drive.</p>
+        <h3>Bouton retour d'Android</h3>
+        <p class="muted">Le bouton (ou geste) retour ferme la dernière fenêtre ouverte : fiche, photo, document, galerie, paramètres. À l'écran de départ (caméra sur le téléphone, documents sur la tablette), il quitte l'app.</p>
         <h3>Affichage clair ou sombre</h3>
         <p class="muted">Paramètres › Affichage : Sombre, Clair ou Comme l'appareil (suit le réglage d'Android). Chaque appareil garde son propre choix.</p>
         <h3>Confidentialité</h3>
         <p class="muted">Les photos ne vont jamais dans la galerie. Sans réseau, elles attendent dans l'espace privé de l'app, invisible des autres applications, et sont effacées dès qu'elles sont arrivées sur le Drive.</p>
-        <p class="hint mono">PhotoChantier · version 1.5 bêta</p>
+        <p class="hint mono">PhotoChantier · version 1.6 bêta</p>
       </section>
     </div>
   </div>
@@ -3877,6 +3879,60 @@ function bind(){
 }
 function applyBrand(){}
 
+
+/* ---------- Bouton « retour » d'Android (v1.6) ---------- */
+/* Chaque écran ou fenêtre ouvert ajoute une étape dans l'historique : « retour » ferme le dernier ouvert.
+   À l'écran de départ (caméra sur le téléphone, documents sur la tablette), « retour » quitte l'app comme toute app Android. */
+const BACK = {on:false, depth:0, ignore:0, timer:0};
+const isOpen = sel => { const el = $(sel); return !!el && !el.hidden; };
+function backLayers(){
+  let n = stack.length;
+  if (isOpen('#docEditor')) n++;
+  if (isOpen('#viewer')) n++;
+  if (isOpen('#docView')) n++;
+  if (isOpen('#settings')) n++;
+  if (isOpen('#gallery')) { n++; if (gal.view === 'map' && isOpen('#mapStrip')) n++; if (gal.selMode) n++; }
+  if (deskHome() ? !isOpen('#desk') : isOpen('#desk')) n++;
+  return n;
+}
+function backCloseTop(){
+  if (stack.length) { closeSheet(); return true; }
+  if (isOpen('#docEditor')) { closeEditor(); return true; }
+  if (isOpen('#viewer')) { closeViewer(); return true; }
+  if (isOpen('#docView')) { closeDocView(); return true; }
+  if (isOpen('#settings')) { $('#setBack').click(); return true; }
+  if (isOpen('#gallery')) {
+    if (gal.view === 'map' && isOpen('#mapStrip')) { $('#mapStrip').hidden = true; return true; }
+    if (gal.selMode) { gal.selMode = false; gal.sel.clear(); renderGallery(); return true; }
+    closeGallery(); return true;
+  }
+  if (deskHome()) { if (!isOpen('#desk')) { openDesk(); return true; } }
+  else if (isOpen('#desk')) { closeDesk(); return true; }
+  return false;
+}
+function backSync(){
+  BACK.timer = 0;
+  if (!BACK.on) return;
+  const want = backLayers();
+  if (want > BACK.depth) { while (BACK.depth < want) { BACK.depth++; history.pushState({pc:BACK.depth}, ''); } }
+  else if (want < BACK.depth) { const k = BACK.depth - want; BACK.depth = want; BACK.ignore++; history.go(-k); }
+}
+function backSchedule(){ if (!BACK.timer) BACK.timer = setTimeout(backSync, 0); }
+function initBackNav(){
+  if (BACK.on) return;
+  BACK.on = true;
+  try { history.replaceState({pc:0}, ''); } catch (e) {}
+  const mo = new MutationObserver(backSchedule);
+  ['.sheet', '#docEditor', '#viewer', '#docView', '#settings', '#gallery', '#mapStrip', '#galBar', '#desk'].forEach(q => $$(q).forEach(el => mo.observe(el, {attributes:true, attributeFilter:['hidden']})));
+  window.addEventListener('popstate', () => {
+    if (BACK.ignore) { BACK.ignore--; return; }
+    if (BACK.depth > 0) BACK.depth--;
+    backCloseTop();
+    backSchedule();
+  });
+  backSync();
+}
+
 /* ---------- Démarrage ---------- */
 async function init(){
   const auth = readAuthHash();
@@ -3900,6 +3956,7 @@ async function init(){
   if (shareParam === 'err') note('Réception des photos impossible. Réessaie depuis l’autre application.', 4500);
   if (await refreshInboxBadge()) openImport();
   else if (shareParam === '0') note('Aucune photo reçue.', 3000);
+  initBackNav();
   if ('serviceWorker' in navigator && !IN_FRAME && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
   if (document.fonts?.load) document.fonts.load('700 20px Barlow').then(() => { if (!$('#settings').hidden) drawPreview(); }).catch(() => {});
 }
